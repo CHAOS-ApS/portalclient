@@ -1,0 +1,19 @@
+{
+	"name": "portalclient",
+	"version": "3.0.0",
+	"license": "MIT",
+	"description": "A Typescript / Javascript client for the Portal api",
+	"homepage": "https://github.com/CHAOS-ApS/portalclient",
+	"private": false,
+	"author": {
+		"name": "Jacob Poul Richardt",
+		"email": "jacob@chaosinsight.com"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git@github.com:CHAOS-ApS/portalclient.git"
+	},
+	"dependencies": {
+		
+	}
+}
