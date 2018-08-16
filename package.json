@@ -5,15 +5,24 @@
 	"description": "A Typescript / Javascript client for the Portal api",
 	"homepage": "https://github.com/CHAOS-ApS/portalclient",
 	"private": false,
+	"browser": "./dist/index.js",
+	"main": "./dist/index.js",
+	"type": "./dist/index.js.map",
+	"scripts": {
+		"build": "tsc"
+	},
 	"author": {
 		"name": "Jacob Poul Richardt",
-		"email": "jacob@chaosinsight.com"
+		"email": "jacob@chaosinsight.com",
+		"url": "https://twitter.com/JacobRichardt"
 	},
 	"repository": {
 		"type": "git",
 		"url": "git@github.com:CHAOS-ApS/portalclient.git"
 	},
-	"dependencies": {
-		
+	"dependencies": {},
+	"devDependencies": {
+		"typescript": "3.0.1",
+		"tslint": "5.11.0"
 	}
 }
