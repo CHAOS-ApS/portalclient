@@ -1,5 +1,5 @@
 {
-	"name": "portalclient",
+	"name": "@chaosinsight/portalclient",
 	"version": "3.0.0",
 	"license": "MIT",
 	"description": "A Typescript / Javascript client for the Portal api",
