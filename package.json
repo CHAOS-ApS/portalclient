@@ -9,7 +9,9 @@
 	"main": "./dist/index.js",
 	"type": "./dist/index.js.map",
 	"scripts": {
-		"build": "tsc"
+		"build": "tsc",
+		"prepublishOnly": "tsc",
+		"lint": "tslint -p tsconfig.json"
 	},
 	"author": {
 		"name": "Jacob Poul Richardt",
