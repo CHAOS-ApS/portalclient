@@ -7,7 +7,7 @@
 	"private": false,
 	"browser": "./dist/index.js",
 	"main": "./dist/index.js",
-	"type": "./dist/index.js.map",
+	"type": "./dist/index.d.ts",
 	"scripts": {
 		"build": "tsc",
 		"prepublishOnly": "tsc",
