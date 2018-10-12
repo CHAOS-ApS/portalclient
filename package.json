@@ -4,6 +4,7 @@
 	"license": "MIT",
 	"description": "A Typescript / Javascript client for the Portal api",
 	"homepage": "https://github.com/CHAOS-ApS/portalclient",
+	"keywords": ["portal", "sdk", "typescript", "javascript"],
 	"private": false,
 	"browser": "./dist/index.js",
 	"main": "./dist/index.js",

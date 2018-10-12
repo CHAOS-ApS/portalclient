@@ -4,8 +4,10 @@ import {ISession} from "../data"
 import Extension from "./extension"
 
 export default class Session extends Extension {
+	protected readonly extensionName: string = "Session"
+
 	public Create(): ServiceCall<ISession> {
-		return this.call("Session/Create", null, HttpMethod.Get, SessionRequirement.none)
+		return this.call("Create", null, HttpMethod.Get, SessionRequirement.none)
 	}
 }
 

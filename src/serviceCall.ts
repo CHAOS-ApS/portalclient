@@ -10,7 +10,7 @@ export default class ServiceCall<T> {
 
 	private readonly client: PortalClient
 
-	private readonly response: Promise<IPortalResponse<IPagedPortalResult<T>>>
+	public readonly response: Promise<IPortalResponse<IPagedPortalResult<T>>>
 
 	constructor(client: PortalClient, path: string, parameters: Parameters | null = null, method: HttpMethod, sessionRequirement: SessionRequirement) {
 		this.client = client
