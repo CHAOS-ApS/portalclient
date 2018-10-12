@@ -1,18 +1,18 @@
-import PortalClient from "./portalClient"
+import {PortalClient} from "./portalClient"
 import {IPagedPortalResult, IPortalResponse} from "./data"
 
-type Parameters = { [index: string]: any }
+export type Parameters = { [index: string]: any }
 
 export default class ServiceCall<T> {
 	private static readonly sessionParameterName = "sessionGUID"
 	private static readonly formatParameterName = "format"
 	private static readonly formatParameterValue = "json3"
 
-	public readonly client: PortalClient
+	private readonly client: PortalClient
 
 	private readonly response: Promise<IPortalResponse<IPagedPortalResult<T>>>
 
-	constructor(client: PortalClient, path: string, parameters: Parameters | null = null, method: HttpMethod = HttpMethod.Get, sessionRequirement: SessionRequirement = SessionRequirement.basic) {
+	constructor(client: PortalClient, path: string, parameters: Parameters | null = null, method: HttpMethod, sessionRequirement: SessionRequirement) {
 		this.client = client
 
 		this.response = this.createFetch(path, parameters, method, sessionRequirement)
@@ -23,7 +23,7 @@ export default class ServiceCall<T> {
 	private createFetch(path: string, parameters: Parameters | null, method: HttpMethod, sessionRequirement: SessionRequirement): Promise<Response> {
 		let url = new URL(this.getUrlToExtension(path))
 		parameters = ServiceCall.handleStandardParameters(parameters)
-		this.handleSessionParameter(path, parameters, method, sessionRequirement)
+		this.handleSessionParameter(path, parameters, sessionRequirement)
 
 		let body: FormData | undefined = undefined
 
@@ -53,7 +53,7 @@ export default class ServiceCall<T> {
 		return parameters
 	}
 
-	private handleSessionParameter(path: string, parameters: Parameters, method: HttpMethod, sessionRequirement: SessionRequirement): void {
+	private handleSessionParameter(path: string, parameters: Parameters, sessionRequirement: SessionRequirement): void {
 		if (sessionRequirement !== SessionRequirement.none) {
 			if (!this.client.hasSession)
 				throw new Error(`A session is required for "${path}"`)
@@ -68,12 +68,25 @@ export default class ServiceCall<T> {
 		return this.client.servicePath + "v" + this.client.protocolVersion + "/" + path;
 	}
 
-	private createResponse(fetchResponse: Response): IPortalResponse<IPagedPortalResult<T>> {
-		throw new Error("Not implemented")
+	private createResponse(response: Response): Promise<IPortalResponse<IPagedPortalResult<T>>> {
+		return response.json()
+			.then(r => {
+				if (r.Error === null || r.Error.Fullname === null)
+					r.Error = null
+
+				return r
+			})
 	}
 
 	private createErrorResponse(reason: string): IPortalResponse<IPagedPortalResult<T>> {
-		throw new Error("Not implemented")
+		return {
+			Header: null,
+			Body: null,
+			Error: {
+				Fullname: "FetchError",
+				Message: reason
+			}
+		}
 	}
 }
 

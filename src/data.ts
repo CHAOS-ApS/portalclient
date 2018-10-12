@@ -24,6 +24,6 @@ export interface IPagedPortalResult<T> {
 export interface IError {
 	Fullname: string
 	Message: string
-	Stacktrace: string
-	InnerException: IError
+	Stacktrace?: string
+	InnerException?: IError
 }

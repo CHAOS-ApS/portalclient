@@ -1,20 +1,17 @@
 import {ISession} from "./data"
+import {IExtensionHandler, ExtensionHandler} from "./extensions/extensionHandler"
 
-export default class PortalClient {
+export class PortalClient {
 	public readonly protocolVersion = "6"
 	public readonly servicePath: string
+	public readonly call: IExtensionHandler
 
 	private _session: ISession | null = null
 	private authenticationType: string | null = null
 
 	constructor(servicePath: string) {
-		if (servicePath === null || servicePath === "")
-			throw new Error("Parameter servicePath can't be empty")
-
-		if(servicePath.substr(servicePath.length -1, 1) !== "/")
-			servicePath += "/";
-
-		this.servicePath = servicePath
+		this.servicePath = this.getServicePath(servicePath)
+		this.call = new ExtensionHandler(this)
 	}
 
 	public get hasSession(): boolean {
@@ -35,5 +32,15 @@ export default class PortalClient {
 
 	public setAuthenticated(type: string): void {
 		this.authenticationType = type
+	}
+
+	private getServicePath(value: string): string {
+		if (value === null || value === "")
+			throw new Error("Parameter servicePath can't be empty")
+
+		if(value.substr(value.length -1, 1) !== "/")
+			value += "/"
+
+		return value
 	}
 }
