@@ -1,13 +1,12 @@
-import {PortalClient} from "../portalClient"
 import ServiceCall, {HttpMethod, SessionRequirement} from "../serviceCall"
 import {ISession} from "../data"
 import Extension from "./extension"
 
 export default class Session extends Extension {
-	protected readonly extensionName: string = "session"
+	protected readonly extensionName: string = "Session"
 
-	public Create(): ServiceCall<ISession> {
-		const call = this.call<ISession>("create", null, HttpMethod.Get, SessionRequirement.none)
+	public create(): ServiceCall<ISession> {
+		const call = this.call<ISession>("Create", null, HttpMethod.Get, SessionRequirement.none)
 
 		call.response.then(r => {
 			this.client.updateSession(r.Body!.Results[0])
@@ -17,11 +16,11 @@ export default class Session extends Extension {
 	}
 }
 
-declare module "../portalClient" {
+declare module "../serviceCall" {
 	// tslint:disable-next-line
-	interface PortalClient {
+	interface ServiceCall {
 		session: Session
 	}
 }
 
-Extension.add(Session)
+Extension.add(Session, "session")

@@ -21,7 +21,7 @@ export default abstract class Extension implements IExtension {
 		return new ServiceCall<T>(this.client, `${this.extensionName}/${methodName}`, parameters, HttpMethod.Get, sessionRequirement)
 	}
 
-	public static add(extensionConstructor: IExtensionConstructor): void {
-		ExtensionHandler.add(extensionConstructor)
+	public static add(extensionConstructor: IExtensionConstructor, extensionName: string): void {
+		ExtensionHandler.add(extensionConstructor, extensionName)
 	}
 }

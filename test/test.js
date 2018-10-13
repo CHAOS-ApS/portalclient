@@ -6,7 +6,7 @@ var client = new PortalClient("");
 console.log(client.hasSession);
 console.log(client.isAuthenticated);
 
-var call = client.call.Session.Create();
+var call = client.call.session.create();
 
 call.response.then(result => {
 	console.log(result.Body.Results[0]);
