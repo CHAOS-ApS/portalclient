@@ -7,11 +7,18 @@ export default class Session extends Extension {
 	protected readonly extensionName: string = "Session"
 
 	public Create(): ServiceCall<ISession> {
-		return this.call("Create", null, HttpMethod.Get, SessionRequirement.none)
+		const call = this.call<ISession>("Create", null, HttpMethod.Get, SessionRequirement.none)
+
+		call.response.then(r => {
+			this.client.updateSession(r.Body!.Results[0])
+		})
+
+		return call
 	}
 }
 
 declare module "../portalClient" {
+	// tslint:disable-next-line
 	interface PortalClient {
 		Session: Session
 	}

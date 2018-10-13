@@ -12,9 +12,9 @@ export class ExtensionHandler implements IExtensionHandler {
 
 	public static add(extensionConstructor: IExtensionConstructor): void {
 		Object.defineProperty(ExtensionHandler.prototype, extensionConstructor.prototype.constructor.name, {
-			get: function(this: ExtensionHandler ) {
+			get(this: ExtensionHandler ) {
 				return new extensionConstructor(this.client)
-			}
+			},
 		})
 	}
 }

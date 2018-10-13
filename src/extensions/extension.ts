@@ -1,5 +1,5 @@
 import {PortalClient} from "../portalClient"
-import ServiceCall, {HttpMethod, Parameters, SessionRequirement} from "../serviceCall"
+import ServiceCall, {HttpMethod, IParameters, SessionRequirement} from "../serviceCall"
 import {ExtensionHandler} from "./extensionHandler"
 
 export interface IExtensionConstructor {
@@ -17,11 +17,11 @@ export default abstract class Extension implements IExtension {
 
 	}
 
-	protected call<T>(methodName: string, parameters: Parameters | null, method: HttpMethod = HttpMethod.Get, sessionRequirement: SessionRequirement = SessionRequirement.basic): ServiceCall<T> {
+	protected call<T>(methodName: string, parameters: IParameters | null, method: HttpMethod = HttpMethod.Get, sessionRequirement: SessionRequirement = SessionRequirement.basic): ServiceCall<T> {
 		return new ServiceCall<T>(this.client, `${this.extensionName}/${methodName}`, parameters, HttpMethod.Get, sessionRequirement)
 	}
 
 	public static add(extensionConstructor: IExtensionConstructor): void {
-		ExtensionHandler.add(extensionConstructor);
+		ExtensionHandler.add(extensionConstructor)
 	}
 }

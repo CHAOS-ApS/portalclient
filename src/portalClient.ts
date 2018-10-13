@@ -1,11 +1,12 @@
 import {ISession} from "./data"
-import {IExtensionHandler, ExtensionHandler} from "./extensions/extensionHandler"
+import {ExtensionHandler, IExtensionHandler} from "./extensions/extensionHandler"
 
 export class PortalClient {
 	public readonly protocolVersion = "6"
 	public readonly servicePath: string
 	public readonly call: IExtensionHandler
 
+	// tslint:disable-next-line
 	private _session: ISession | null = null
 	private authenticationType: string | null = null
 
@@ -38,7 +39,7 @@ export class PortalClient {
 		if (value === null || value === "")
 			throw new Error("Parameter servicePath can't be empty")
 
-		if(value.substr(value.length -1, 1) !== "/")
+		if (value.substr(value.length - 1, 1) !== "/")
 			value += "/"
 
 		return value
