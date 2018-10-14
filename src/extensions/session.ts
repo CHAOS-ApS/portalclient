@@ -1,6 +1,7 @@
 import {HttpMethod, IServiceCall, SessionRequirement} from "../serviceCall"
 import {ISession} from "../data"
 import Extension from "./extension"
+import "./extensionHandler"
 
 export default class Session extends Extension {
 	protected readonly extensionName: string = "Session"

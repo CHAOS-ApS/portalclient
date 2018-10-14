@@ -2,7 +2,7 @@ import {ISession} from "./data"
 import ExtensionHandler from "./extensions/extensionHandler"
 
 export class PortalClient {
-	public readonly protocolVersion = "6"
+	public readonly protocolVersion: string = "6"
 	public readonly servicePath: string
 	public readonly call: ExtensionHandler
 
