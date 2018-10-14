@@ -1,7 +1,7 @@
 import {PortalClient} from "./portalClient"
 import {IPagedPortalResult, IPortalResponse} from "./data"
 
-export default class ServiceCall<T> {
+export class ServiceCall<T> implements IServiceCall<T> {
 	private static readonly sessionParameterName = "sessionGUID"
 	private static readonly formatParameterName = "format"
 	private static readonly formatParameterValue = "json3"
@@ -93,6 +93,10 @@ export default class ServiceCall<T> {
 
 		return parameters
 	}
+}
+
+export interface IServiceCall<T> {
+	readonly result: Promise<T[]>
 }
 
 export interface IParameters {

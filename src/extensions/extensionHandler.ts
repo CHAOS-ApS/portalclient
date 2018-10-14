@@ -1,11 +1,7 @@
 import {PortalClient} from "../portalClient"
 import {IExtensionConstructor} from "./extension"
 
-export interface IExtensionHandler {
-
-}
-
-export class ExtensionHandler implements IExtensionHandler {
+export default class ExtensionHandler {
 	constructor(private client: PortalClient) {
 
 	}

@@ -1,11 +1,11 @@
-import ServiceCall, {HttpMethod, SessionRequirement} from "../serviceCall"
+import {HttpMethod, IServiceCall, SessionRequirement} from "../serviceCall"
 import {ISession} from "../data"
 import Extension from "./extension"
 
 export default class Session extends Extension {
 	protected readonly extensionName: string = "Session"
 
-	public create(): ServiceCall<ISession> {
+	public create(): IServiceCall<ISession> {
 		const call = this.call<ISession>("Create", null, HttpMethod.Get, SessionRequirement.none)
 
 		call.response.then(r => {
@@ -16,9 +16,9 @@ export default class Session extends Extension {
 	}
 }
 
-declare module "../serviceCall" {
+declare module "./extensionHandler" {
 	// tslint:disable-next-line
-	interface ServiceCall {
+	interface ExtensionHandler {
 		session: Session
 	}
 }

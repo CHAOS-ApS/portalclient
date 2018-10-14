@@ -1,10 +1,10 @@
 import {ISession} from "./data"
-import {ExtensionHandler, IExtensionHandler} from "./extensions/extensionHandler"
+import ExtensionHandler from "./extensions/extensionHandler"
 
 export class PortalClient {
 	public readonly protocolVersion = "6"
 	public readonly servicePath: string
-	public readonly call: IExtensionHandler
+	public readonly call: ExtensionHandler
 
 	// tslint:disable-next-line
 	private _session: ISession | null = null

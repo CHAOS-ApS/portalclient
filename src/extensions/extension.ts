@@ -1,6 +1,6 @@
 import {PortalClient} from "../portalClient"
-import ServiceCall, {HttpMethod, IParameters, SessionRequirement} from "../serviceCall"
-import {ExtensionHandler} from "./extensionHandler"
+import {HttpMethod, IParameters, ServiceCall, SessionRequirement} from "../serviceCall"
+import ExtensionHandler from "./extensionHandler"
 
 export interface IExtensionConstructor {
 	new (client: PortalClient): IExtension
