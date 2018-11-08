@@ -46,11 +46,13 @@ export default class Session extends Extension {
 	}
 }
 
-Extension.add(Session, "session")
+export {ISession}
+
+/*Extension.add(Session, "session")
 
 declare module "./extensionHandler" {
 	// tslint:disable-next-line
 	interface ExtensionHandler {
 		session: Session
 	}
-}
+}*/
