@@ -24,9 +24,8 @@ export default class AuthKey extends AuthenticationExtension {
 	}
 }
 
-export interface IAuthKey
-{
-	Name: string;
-	Token: string;
-	UserGuid: string;
+export interface IAuthKey {
+	Name: string
+	Token: string
+	UserGuid: string
 }
