@@ -14,6 +14,36 @@ export default class Session extends Extension {
 
 		return call
 	}
+
+	public get(): IServiceCall<ISession> {
+		const call = this.call<ISession>("Create", null, HttpMethod.Get, SessionRequirement.basic)
+
+		call.response.then(r => {
+			this.client.updateSession(r.Body!.Results[0])
+		})
+
+		return call
+	}
+
+	public update(): IServiceCall<ISession> {
+		const call = this.call<ISession>("Update", null, HttpMethod.Get, SessionRequirement.basic)
+
+		call.response.then(r => {
+			this.client.updateSession(r.Body!.Results[0])
+		})
+
+		return call
+	}
+
+	public delete(): IServiceCall<ISession> {
+		const call = this.call<ISession>("Delete", null, HttpMethod.Get, SessionRequirement.basic)
+
+		call.response.then(r => {
+			this.client.updateSession(null)
+		})
+
+		return call
+	}
 }
 
 Extension.add(Session, "session")

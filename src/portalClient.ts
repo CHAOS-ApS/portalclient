@@ -27,11 +27,14 @@ export class PortalClient {
 		return this.authenticationType !== null
 	}
 
-	public updateSession(session: ISession): void {
+	public updateSession(session: ISession | null): void {
 		this._session = session
+
+		if (session == null)
+			this.setAuthenticated(null)
 	}
 
-	public setAuthenticated(type: string): void {
+	public setAuthenticated(type: string | null): void {
 		this.authenticationType = type
 	}
 
