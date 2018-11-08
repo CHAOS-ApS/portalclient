@@ -1,10 +1,3 @@
-export interface ISession {
-	Guid: string
-	UserGuid: string
-	DateCreated: number
-	DateModified: number
-}
-
 export interface IPortalResponse<TBody> {
 	Header: IHeader | null
 	Body: TBody | null
@@ -26,4 +19,15 @@ export interface IError {
 	Message: string
 	Stacktrace?: string
 	InnerException?: IError
+}
+
+export interface ISession {
+	Guid: string
+	UserGuid: string
+	DateCreated: number
+	DateModified: number
+}
+
+export interface IBooleanResult {
+	WasSuccess: boolean
 }

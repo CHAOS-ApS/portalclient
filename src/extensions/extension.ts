@@ -21,7 +21,24 @@ export default abstract class Extension implements IExtension {
 		return new ServiceCall<T>(this.client, `${this.extensionName}/${methodName}`, parameters, HttpMethod.Get, sessionRequirement)
 	}
 
+	protected onSuccess<T>(call: ServiceCall<T>, onSuccess: (value: T[]) => void): ServiceCall<T> {
+		call.result.then(onSuccess)
+		return call
+	}
+
 	public static add<T>(extensionConstructor: IExtensionConstructor<T>, extensionName: string): void {
 		ExtensionHandler.add(extensionConstructor, extensionName)
+	}
+}
+
+export abstract class AuthenticationExtension extends Extension {
+	public abstract readonly authenticationType: string
+
+	protected setAuthenticatedOnSuccess<T>(call: ServiceCall<T>): ServiceCall<T> {
+		return this.onSuccess(call, () => this.client.setAuthenticated(this.authenticationType));
+	}
+
+	protected setUnauthenticatedOnSuccess<T>(call: ServiceCall<T>): ServiceCall<T> {
+		return this.onSuccess(call, () => this.client.setAuthenticated(null));
 	}
 }
