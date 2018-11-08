@@ -5,6 +5,7 @@
 		"sourceMap": true,
 		"strict": true,
 		"declaration": true,
+		"baseUrl": "./src/",
 		"outDir": "./dist",
 		"lib": ["dom", "es5", "scripthost", "es2015.promise"]
 	},

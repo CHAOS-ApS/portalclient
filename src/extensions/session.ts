@@ -1,7 +1,6 @@
 import {HttpMethod, IServiceCall, SessionRequirement} from "../serviceCall"
 import {ISession} from "../data"
 import Extension from "./extension"
-import "./extensionHandler"
 
 export default class Session extends Extension {
 	protected readonly extensionName: string = "Session"
@@ -17,11 +16,11 @@ export default class Session extends Extension {
 	}
 }
 
+Extension.add(Session, "session")
+
 declare module "./extensionHandler" {
 	// tslint:disable-next-line
 	interface ExtensionHandler {
 		session: Session
 	}
 }
-
-Extension.add(Session, "session")
