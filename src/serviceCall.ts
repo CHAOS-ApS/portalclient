@@ -61,7 +61,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 	}
 
 	private getUrlToExtension(path: string): string {
-		return this.client.servicePath + "v" + this.client.protocolVersion + "/" + path
+		return this.client.servicePath + "v" + this.client.protocolVersion.toString(10) + "/" + path
 	}
 
 	private createResponse(response: Response): Promise<IPortalResponse<IPagedPortalResult<T>>> {

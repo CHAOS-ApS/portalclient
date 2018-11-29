@@ -2,16 +2,19 @@ import {ISession} from "./data"
 import ExtensionHandler from "./extensions/extensionHandler"
 
 export class PortalClient {
-	public readonly protocolVersion: string = "6"
+
 	public readonly servicePath: string
 	public readonly call: ExtensionHandler
 
 	// tslint:disable-next-line
 	private _session: ISession | null = null
+	// tslint:disable-next-line
+	private readonly _protocolVersion: number = 6
 	private authenticationType: string | null = null
 
-	constructor(servicePath: string) {
+	constructor(servicePath: string, protocolVersion: number = 6) {
 		this.servicePath = this.getServicePath(servicePath)
+		this._protocolVersion = protocolVersion
 		this.call = new ExtensionHandler(this)
 	}
 
@@ -21,6 +24,10 @@ export class PortalClient {
 
 	public get session(): ISession | null {
 		return this._session
+	}
+
+	public get protocolVersion(): number {
+		return this._protocolVersion
 	}
 
 	public get isAuthenticated(): boolean {
