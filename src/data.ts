@@ -22,7 +22,7 @@ export interface IError {
 }
 
 export interface ISession {
-	Guid: string
+	Id: string
 	UserGuid: string
 	DateCreated: number
 	DateModified: number
