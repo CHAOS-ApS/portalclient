@@ -7,7 +7,6 @@ export class ServiceCall<T> implements IServiceCall<T> {
 	private static readonly formatParameterValue = "json3"
 
 	public readonly response: Promise<IPortalResponse<IPagedPortalResult<T>>>
-	public readonly result: Promise<T[]>
 
 	private readonly client: PortalClient
 
@@ -17,11 +16,25 @@ export class ServiceCall<T> implements IServiceCall<T> {
 		this.response = this.createFetch(path, parameters, method, sessionRequirement)
 			.then(r => this.createResponse(r))
 			.catch(reason => this.createErrorResponse(reason))
+	}
 
-		this.result = this.response.then(r => {
+	public get result(): Promise<T[]> {
+		return this.response.then(r => {
 			if (r.Error !== null)
 				throw r.Error.Message
 			return r.Body!.Results
+		})
+	}
+
+	public get singleResult(): Promise<T> {
+		return this.result.then(r => {
+			if (r.length === 0)
+				throw new Error("No results returned")
+
+			if (r.length !== 1)
+				throw new Error(`More than 1 result reutned (${r.length})`)
+
+			return r[0]
 		})
 	}
 
