@@ -9,17 +9,17 @@ export default class RepeatedPromise<T> {
 	}
 
 	public get value(): T {
-		return this.value
+		return this._value
 	}
 
 	public set value(value: T) {
-		this.value = value
+		this._value = value
 		this.resolve(value)
 		this.initializePromise()
 	}
 
 	public get promise(): Promise<T> {
-		return this.promise
+		return this._promise
 	}
 
 	public async whenNotNull(): Promise<T> {
