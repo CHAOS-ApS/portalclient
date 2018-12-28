@@ -111,6 +111,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 export interface IServiceCall<T> {
 	readonly response: Promise<IPortalResponse<IPagedPortalResult<T>>>
 	readonly result: Promise<T[]>
+	readonly singleResult: Promise<T>
 }
 
 export interface IParameters {
