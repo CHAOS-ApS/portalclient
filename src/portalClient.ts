@@ -25,11 +25,11 @@ export class PortalClient {
 	}
 
 	public get hasSession(): boolean {
-		return this.authenticationType !== null
+		return this.session !== null
 	}
 
 	public get session(): ISession | null {
-		return this._session.Value
+		return this._session.value
 	}
 
 	public get protocolVersion(): number {
@@ -37,30 +37,26 @@ export class PortalClient {
 	}
 
 	public get isAuthenticated(): boolean {
-		return this.authenticationType.Value !== null
+		return this.authenticationType.value !== null
 	}
 
-	public get whenHasSession(): Promise<void> {
-		return this._session.Value
-			? Promise.resolve()
-			: this._session.Promise.then(()=>{})
+	public get whenHasSession(): Promise<ISession> {
+		return this._session.whenNotNull() as Promise<ISession>
 	}
 
 	public get whenIsAuthenticated(): Promise<string> {
-		return this.authenticationType.Value !== null
-			? Promise.resolve(this.authenticationType.Value)
-			: this.authenticationType.Promise as Promise<string>
+		return this.authenticationType.whenNotNull() as Promise<string>
 	}
 
 	public updateSession(session: ISession | null): void {
-		this._session.setValue(session)
+		this._session.value = session
 
 		if (session == null)
 			this.setAuthenticated(null)
 	}
 
 	public setAuthenticated(type: string | null): void {
-		this.authenticationType.setValue(type)
+		this.authenticationType.value = type
 	}
 
 	private getServicePath(value: string): string {
