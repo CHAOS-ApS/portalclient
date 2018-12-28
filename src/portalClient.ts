@@ -17,7 +17,7 @@ export class PortalClient {
 	private whenSessionIsAuthenticated!: Promise<string>
 
 	constructor(servicePath: string, protocolVersion: number = 6) {
-		this.servicePath = this.getServicePath(servicePath)
+		this.servicePath = PortalClient.getServicePath(servicePath)
 		this._protocolVersion = protocolVersion
 		this._session = new RepeatedPromise<ISession | null>(null)
 		this.authenticationType = new RepeatedPromise<string | null>(null)
@@ -49,6 +49,8 @@ export class PortalClient {
 	}
 
 	public updateSession(session: ISession | null): void {
+		PortalClient.fixSession(session)
+
 		this._session.value = session
 
 		if (session == null)
@@ -59,7 +61,14 @@ export class PortalClient {
 		this.authenticationType.value = type
 	}
 
-	private getServicePath(value: string): string {
+	private static fixSession(session: ISession | null): void { // Fix if API is old version
+		if (session === null || session.Id)
+			return
+
+		session.Id = (session as any).Guid
+	}
+
+	private static getServicePath(value: string): string {
 		if (value === null || value === "")
 			throw new Error("Parameter servicePath can't be empty")
 
