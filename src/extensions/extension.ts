@@ -24,7 +24,7 @@ export default abstract class Extension implements IExtension {
 	}
 
 	protected onSuccess<T>(call: ServiceCall<T>, onSuccess: (value: T[]) => void): ServiceCall<T> {
-		call.result.then(onSuccess)
+		call.results.then(onSuccess)
 		return call
 	}
 

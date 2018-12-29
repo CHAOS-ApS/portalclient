@@ -18,7 +18,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 			.catch(reason => this.createErrorResponse(reason))
 	}
 
-	public get result(): Promise<T[]> {
+	public get results(): Promise<T[]> {
 		return this.response.then(r => {
 			if (r.Error !== null)
 				throw r.Error.Message
@@ -27,7 +27,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 	}
 
 	public get singleResult(): Promise<T> {
-		return this.result.then(r => {
+		return this.results.then(r => {
 			if (r.length === 0)
 				throw new Error("No results returned")
 
@@ -110,7 +110,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 
 export interface IServiceCall<T> {
 	readonly response: Promise<IPortalResponse<IPagedPortalResult<T>>>
-	readonly result: Promise<T[]>
+	readonly results: Promise<T[]>
 	readonly singleResult: Promise<T>
 }
 
