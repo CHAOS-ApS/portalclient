@@ -21,7 +21,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 	public get results(): Promise<T[]> {
 		return this.response.then(r => {
 			if (r.Error !== null)
-				throw r.Error.Message
+				throw new Error(r.Error.Message)
 			return r.Body!.Results
 		})
 	}
