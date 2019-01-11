@@ -19,8 +19,8 @@ export default abstract class Extension implements IExtension {
 
 	}
 
-	protected call<T>(methodName: string, parameters: IParameters | null, method: HttpMethod = HttpMethod.Get, sessionRequirement: SessionRequirement = SessionRequirement.basic): ServiceCall<T> {
-		return new ServiceCall<T>(this.client, `${this.extensionName}/${methodName}`, parameters, HttpMethod.Get, sessionRequirement)
+	protected call<T>(methodName: string, parameters: IParameters | null = null, method: HttpMethod = HttpMethod.Get, sessionRequirement: SessionRequirement = SessionRequirement.basic): ServiceCall<T> {
+		return new ServiceCall<T>(this.client, `${this.extensionName}/${methodName}`, parameters, method, sessionRequirement)
 	}
 
 	protected onSuccess<T>(call: ServiceCall<T>, onSuccess: (value: T[]) => void): ServiceCall<T> {
