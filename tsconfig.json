@@ -7,10 +7,6 @@
 		"declaration": true,
 		"baseUrl": "./src/",
 		"outDir": "./dist",
-		"paths": {
-			"portalclient": ["./"],
-			"portalclient/*": ["./*"]
-		},
 		"lib": ["es5", "es2015.promise", "dom", "scripthost"]
 	},
 	"exclude": [

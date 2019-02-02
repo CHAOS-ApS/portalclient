@@ -1,6 +1,6 @@
-import {ISession} from "portalclient/data"
-import ExtensionHandler from "portalclient/extensions/extensionHandler"
-import RepeatedPromise from "portalclient/repeatedPromise"
+import {ISession} from "./data"
+import ExtensionHandler from "./extensions/extensionHandler"
+import RepeatedPromise from "./repeatedPromise"
 
 export class PortalClient {
 
