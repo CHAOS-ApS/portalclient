@@ -1,13 +1,17 @@
 {
 	"compilerOptions": {
-		"module": "commonjs",
-		"target": "es5",
+		"module": "es2015",
+		"target": "es2015",
 		"sourceMap": true,
 		"strict": true,
 		"declaration": true,
 		"baseUrl": "./src/",
 		"outDir": "./dist",
-		"lib": ["dom", "es5", "scripthost", "es2015.promise"]
+		"paths": {
+			"portalclient": ["./"],
+			"portalclient/*": ["./*"]
+		},
+		"lib": ["es5", "es2015.promise", "dom", "scripthost"]
 	},
 	"exclude": [
 		"node_modules",

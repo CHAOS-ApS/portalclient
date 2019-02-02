@@ -1,6 +1,6 @@
-import {HttpMethod, IServiceCall, SessionRequirement} from "../serviceCall"
-import {ISession} from "../data"
-import Extension from "./extension"
+import {HttpMethod, IServiceCall, SessionRequirement} from "portalclient/serviceCall"
+import {ISession} from "portalclient/data"
+import Extension from "portalclient/extensions/extension"
 
 export default class Session extends Extension {
 	protected readonly extensionName = "Session"
@@ -28,11 +28,11 @@ export default class Session extends Extension {
 
 export {ISession}
 
-/*Extension.add(Session, "session")
+Extension.add(Session, "session")
 
-declare module "./extensionHandler" {
+declare module "portalclient/extensions/extensionHandler" {
 	// tslint:disable-next-line
 	interface ExtensionHandler {
 		session: Session
 	}
-}*/
+}

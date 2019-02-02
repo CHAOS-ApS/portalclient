@@ -1,5 +1,5 @@
-import {PortalClient} from "../portalClient"
-import {IExtension, IExtensionConstructor} from "./extension"
+import {PortalClient} from "portalclient/portalClient"
+import {IExtension, IExtensionConstructor} from "portalclient/extensions/extension"
 import Session from "./session"
 import User from "./user"
 import EmailPassword from "./emailPassword"
@@ -13,10 +13,6 @@ export default class ExtensionHandler {
 
 	constructor(public client: PortalClient) {
 
-	}
-
-	public get session(): Session {
-		return this.getExtension(Session, "session")
 	}
 
 	public get user(): User {

@@ -1,6 +1,6 @@
 {
 	"name": "@chaosinsight/portalclient",
-	"version": "3.1.17",
+	"version": "3.1.18",
 	"license": "MIT",
 	"description": "A Typescript / Javascript client for the Portal api",
 	"homepage": "https://github.com/CHAOS-ApS/portalclient",
@@ -17,8 +17,7 @@
 	"scripts": {
 		"build": "tsc",
 		"prepublishOnly": "tsc",
-		"lint": "tslint -p tsconfig.json",
-		"test": "node test/test.js"
+		"lint": "tslint -p tsconfig.json"
 	},
 	"author": {
 		"name": "Jacob Poul Richardt",
