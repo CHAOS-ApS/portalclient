@@ -2,7 +2,7 @@ import {ISession} from "./data"
 import ExtensionHandler from "./extensions/extensionHandler"
 import RepeatedPromise from "./repeatedPromise"
 
-export class PortalClient {
+export default class PortalClient {
 
 	public readonly servicePath: string
 	public readonly call: ExtensionHandler
