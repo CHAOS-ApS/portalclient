@@ -1,6 +1,6 @@
 // tslint:disable:max-classes-per-file
 
-import {PortalClient} from "../portalClient"
+import PortalClient from "../portalClient"
 import {HttpMethod, IParameters, ServiceCall, SessionRequirement} from "../serviceCall"
 import ExtensionHandler from "./extensionHandler"
 

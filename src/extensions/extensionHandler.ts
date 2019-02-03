@@ -1,4 +1,4 @@
-import {PortalClient} from "../portalClient"
+import PortalClient from "../portalClient"
 import {IExtension, IExtensionConstructor} from "./extension"
 import Session from "./session"
 import User from "./user"
