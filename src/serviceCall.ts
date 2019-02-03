@@ -42,6 +42,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 		const url = new URL(this.getUrlToExtension(path))
 		parameters = ServiceCall.handleStandardParameters(parameters)
 		this.handleSessionParameter(path, parameters, sessionRequirement)
+		this.encodeParameters(parameters)
 
 		let body: FormData | undefined
 
@@ -105,6 +106,42 @@ export class ServiceCall<T> implements IServiceCall<T> {
 		parameters[ServiceCall.formatParameterName] = ServiceCall.formatParameterValue
 
 		return parameters
+	}
+
+	private encodeParameters(parameters: IParameters) {
+		for(const key in parameters) {
+			const value = parameters[key]
+
+			if (value === undefined || value === null) {
+				delete parameters[key]
+				continue
+			}
+
+			switch (typeof value) {
+				case "boolean":
+					parameters[key] = value ? "True" : "False"
+					break
+				case "object":
+					if (value instanceof Date)
+						parameters[key] = ServiceCall.dateToIsoString(value)
+					else if(value instanceof String || value instanceof Number)
+						parameters[key] = value.toString()
+					else
+						parameters[key] = JSON.stringify(value)
+					break
+				case "symbol":
+					throw new Error("A Symbol is not a valid parameter")
+				case "function":
+					throw new Error("A Function not a valid parameter")
+				case "number":
+					break
+			}
+
+		}
+	}
+
+	public static dateToIsoString(value: Date): string {
+		return value.toISOString().slice(0, -1) + "0000Z"
 	}
 }
 
