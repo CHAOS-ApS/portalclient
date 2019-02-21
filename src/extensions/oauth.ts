@@ -1,4 +1,4 @@
-import {HttpMethod, IServiceCall, SessionRequirement, AuthenticationExtension, ISession} from "index"
+import {AuthenticationExtension, HttpMethod, IServiceCall, ISession, SessionRequirement} from "index"
 
 export default class OAuth extends AuthenticationExtension {
 	public readonly authenticationType = "OAuth"
@@ -13,8 +13,7 @@ export default class OAuth extends AuthenticationExtension {
 	}
 }
 
-export interface ILoginEndPoint
-{
-	Uri: string;
-	StateCode: string;
+export interface ILoginEndPoint {
+	Uri: string
+	StateCode: string
 }

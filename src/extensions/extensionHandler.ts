@@ -14,7 +14,7 @@ export default class ExtensionHandler {
 
 	}
 
-	public get session(): Session{
+	public get session(): Session {
 		return this.getExtension(Session, "session")
 	}
 

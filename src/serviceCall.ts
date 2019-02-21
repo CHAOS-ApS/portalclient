@@ -1,21 +1,6 @@
 import PortalClient, {IPagedPortalResult, IPortalResponse} from "index"
 
 export class ServiceCall<T> implements IServiceCall<T> {
-	private static readonly sessionParameterName = "sessionGUID"
-	private static readonly formatParameterName = "format"
-	private static readonly formatParameterValue = "json3"
-
-	public readonly response: Promise<IPortalResponse<IPagedPortalResult<T>>>
-
-	private readonly client: PortalClient
-
-	constructor(client: PortalClient, path: string, parameters: IParameters | null = null, method: HttpMethod, sessionRequirement: SessionRequirement) {
-		this.client = client
-
-		this.response = this.createFetch(path, parameters, method, sessionRequirement)
-			.then(r => this.createResponse(r))
-			.catch(reason => this.createErrorResponse(reason))
-	}
 
 	public get results(): Promise<T[]> {
 		return this.response.then(r => {
@@ -35,6 +20,21 @@ export class ServiceCall<T> implements IServiceCall<T> {
 
 			return r[0]
 		})
+	}
+	private static readonly sessionParameterName = "sessionGUID"
+	private static readonly formatParameterName = "format"
+	private static readonly formatParameterValue = "json3"
+
+	public readonly response: Promise<IPortalResponse<IPagedPortalResult<T>>>
+
+	private readonly client: PortalClient
+
+	constructor(client: PortalClient, path: string, parameters: IParameters | null = null, method: HttpMethod, sessionRequirement: SessionRequirement) {
+		this.client = client
+
+		this.response = this.createFetch(path, parameters, method, sessionRequirement)
+			.then(r => this.createResponse(r))
+			.catch(reason => this.createErrorResponse(reason))
 	}
 
 	private createFetch(path: string, parameters: IParameters | null, method: HttpMethod, sessionRequirement: SessionRequirement): Promise<Response> {
@@ -98,17 +98,8 @@ export class ServiceCall<T> implements IServiceCall<T> {
 		}
 	}
 
-	private static handleStandardParameters(parameters: IParameters | null): IParameters {
-		if (parameters === null)
-			parameters = {}
-
-		parameters[ServiceCall.formatParameterName] = ServiceCall.formatParameterValue
-
-		return parameters
-	}
-
 	private encodeParameters(parameters: IParameters) {
-		for(const key in parameters) {
+		for (const key in parameters) { // tslint:disable-line:forin
 			const value = parameters[key]
 
 			if (value === undefined || value === null) {
@@ -123,7 +114,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 				case "object":
 					if (value instanceof Date)
 						parameters[key] = ServiceCall.dateToIsoString(value)
-					else if(value instanceof String || value instanceof Number)
+					else if (value instanceof String || value instanceof Number)
 						parameters[key] = value.toString()
 					else
 						parameters[key] = JSON.stringify(value)
@@ -141,6 +132,15 @@ export class ServiceCall<T> implements IServiceCall<T> {
 
 	public static dateToIsoString(value: Date): string {
 		return value.toISOString().slice(0, -1) + "0000Z"
+	}
+
+	private static handleStandardParameters(parameters: IParameters | null): IParameters {
+		if (parameters === null)
+			parameters = {}
+
+		parameters[ServiceCall.formatParameterName] = ServiceCall.formatParameterValue
+
+		return parameters
 	}
 }
 

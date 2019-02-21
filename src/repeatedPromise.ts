@@ -1,6 +1,6 @@
 export default class RepeatedPromise<T> {
-	private _value: T
-	private _promise!: Promise<T>
+	private _value: T // tslint:disable-line:variable-name
+	private _promise!: Promise<T> // tslint:disable-line:variable-name
 	private resolve!: (value: T) => void
 
 	constructor(initialValue: T) {

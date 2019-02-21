@@ -1,11 +1,9 @@
 // tslint:disable:max-classes-per-file
 
-import PortalClient, {HttpMethod, IParameters, SessionRequirement, ExtensionHandler} from "index"
+import PortalClient, {ExtensionHandler, HttpMethod, IParameters, SessionRequirement} from "index"
 import {ServiceCall} from "../serviceCall"
 
-export interface IExtensionConstructor<T extends IExtension> {
-	new (client: PortalClient): T
-}
+export type IExtensionConstructor<T extends IExtension> = new (client: PortalClient) => T
 
 export interface IExtension {
 

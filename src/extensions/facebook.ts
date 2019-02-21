@@ -1,4 +1,4 @@
-import {HttpMethod, IServiceCall, SessionRequirement, AuthenticationExtension, ISession} from "index"
+import {AuthenticationExtension, HttpMethod, IServiceCall, ISession, SessionRequirement} from "index"
 
 export default class Facebook extends AuthenticationExtension {
 	public readonly authenticationType = "Facebook"

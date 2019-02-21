@@ -16,7 +16,7 @@
 	"scripts": {
 		"build": "tsc",
 		"prepublishOnly": "tsc",
-		"lint": "tslint -p tsconfig.json --fix"
+		"lint": "tslint -p tsconfig.json"
 	},
 	"author": {
 		"name": "Jacob Poul Richardt",
