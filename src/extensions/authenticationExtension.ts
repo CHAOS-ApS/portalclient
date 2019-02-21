@@ -1,5 +1,5 @@
-import {Extension} from "index"
-import {ServiceCall} from "serviceCall"
+import {Extension} from "../index"
+import {ServiceCall} from "../serviceCall"
 
 export default abstract class AuthenticationExtension extends Extension {
 	public abstract readonly authenticationType: string

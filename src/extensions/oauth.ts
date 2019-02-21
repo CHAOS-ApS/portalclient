@@ -1,4 +1,4 @@
-import {AuthenticationExtension, HttpMethod, IServiceCall, ISession, SessionRequirement} from "index"
+import {AuthenticationExtension, HttpMethod, IServiceCall, ISession, SessionRequirement} from "../index"
 
 export default class OAuth extends AuthenticationExtension {
 	public readonly authenticationType = "OAuth"

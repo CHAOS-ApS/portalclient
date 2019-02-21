@@ -1,4 +1,4 @@
-import {Extension, HttpMethod, IServiceCall, SessionRequirement} from "index"
+import {Extension, HttpMethod, IServiceCall, SessionRequirement} from "../index"
 
 export default class User extends Extension {
 	protected readonly extensionName = "User"

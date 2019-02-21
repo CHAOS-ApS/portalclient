@@ -1,4 +1,4 @@
-import PortalClient, {IPagedPortalResult, IPortalResponse} from "index"
+import PortalClient, {IPagedPortalResult, IPortalResponse} from "./index"
 
 export class ServiceCall<T> implements IServiceCall<T> {
 
