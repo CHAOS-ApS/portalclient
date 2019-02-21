@@ -1,5 +1,5 @@
 import {ExtensionHandler, ISession} from "index"
-import RepeatedPromise from "./repeatedPromise"
+import RepeatedPromise from "src/repeatedPromise"
 
 export default class PortalClient {
 
