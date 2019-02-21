@@ -1,11 +1,11 @@
 import PortalClient, {IExtension, IExtensionConstructor} from "index"
-import Session from "src/extensions/session"
-import User from "src/extensions/user"
-import EmailPassword from "src/extensions/emailPassword"
-import Facebook from "src/extensions/facebook"
-import SecureCookie from "src/extensions/secureCookie"
-import AuthKey from "src/extensions/authKey"
-import OAuth from "src/extensions/oauth"
+import Session from "extensions/session"
+import User from "extensions/user"
+import EmailPassword from "extensions/emailPassword"
+import Facebook from "extensions/facebook"
+import SecureCookie from "extensions/secureCookie"
+import AuthKey from "extensions/authKey"
+import OAuth from "extensions/oauth"
 
 export default class ExtensionHandler {
 	private extensionMap: {[key: string]: IExtension} = {}

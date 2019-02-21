@@ -1,7 +1,7 @@
-import PortalClient from "src/portalClient"
-import Extension, {IExtension, IExtensionConstructor} from "src/extensions/extension"
-import AuthenticationExtension from "src/extensions/authenticationExtension"
-import ExtensionHandler from "src/extensions/extensionHandler"
+import PortalClient from "portalClient"
+import Extension, {IExtension, IExtensionConstructor} from "extensions/extension"
+import AuthenticationExtension from "extensions/authenticationExtension"
+import ExtensionHandler from "extensions/extensionHandler"
 
 export default PortalClient
 
@@ -9,8 +9,8 @@ export {Extension, IExtension, IExtensionConstructor}
 export {AuthenticationExtension}
 export {ExtensionHandler}
 
-export {HttpMethod, IParameters, IServiceCall, SessionRequirement} from "src/serviceCall"
-export {ISession, IBooleanResult, IError, IHeader, IPagedPortalResult, IPortalResponse} from "src/data"
-export {IAuthKey} from "src/extensions/authKey"
-export {ILoginEndPoint} from "src/extensions/oauth"
-export {IUser} from "src/extensions/user"
+export {HttpMethod, IParameters, IServiceCall, SessionRequirement} from "serviceCall"
+export {ISession, IBooleanResult, IError, IHeader, IPagedPortalResult, IPortalResponse} from "data"
+export {IAuthKey} from "extensions/authKey"
+export {ILoginEndPoint} from "extensions/oauth"
+export {IUser} from "extensions/user"
