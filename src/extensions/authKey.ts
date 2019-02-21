@@ -1,7 +1,4 @@
-import {HttpMethod, IServiceCall, SessionRequirement} from "../serviceCall"
-import {AuthenticationExtension} from "./extension"
-import {IBooleanResult, ISession} from "../data"
-import {IUser} from "./user"
+import {HttpMethod, IServiceCall, SessionRequirement, AuthenticationExtension, IBooleanResult, ISession} from "index"
 
 export default class AuthKey extends AuthenticationExtension {
 	public readonly authenticationType = "AuthKey"

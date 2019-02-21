@@ -1,8 +1,7 @@
 // tslint:disable:max-classes-per-file
 
-import PortalClient from "../portalClient"
-import {HttpMethod, IParameters, ServiceCall, SessionRequirement} from "../serviceCall"
-import ExtensionHandler from "./extensionHandler"
+import PortalClient, {HttpMethod, IParameters, SessionRequirement, ExtensionHandler} from "index"
+import {ServiceCall} from "../serviceCall"
 
 export interface IExtensionConstructor<T extends IExtension> {
 	new (client: PortalClient): T
@@ -33,22 +32,3 @@ export default abstract class Extension implements IExtension {
 	}
 }
 
-export abstract class AuthenticationExtension extends Extension {
-	public abstract readonly authenticationType: string
-
-	protected setAuthenticated(): void {
-		this.client.setAuthenticated(this.authenticationType)
-	}
-
-	protected setUnauthenticated(): void {
-		this.client.setAuthenticated(null)
-	}
-
-	protected setAuthenticatedOnSuccess<T>(call: ServiceCall<T>): ServiceCall<T> {
-		return this.onSuccess(call, () => this.setAuthenticated())
-	}
-
-	protected setUnauthenticatedOnSuccess<T>(call: ServiceCall<T>): ServiceCall<T> {
-		return this.onSuccess(call, () => this.setUnauthenticated())
-	}
-}

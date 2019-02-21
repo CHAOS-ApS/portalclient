@@ -1,6 +1,4 @@
-import {HttpMethod, IServiceCall, SessionRequirement} from "../serviceCall"
-import {ISession} from "../data"
-import Extension from "./extension"
+import {Extension, HttpMethod, IServiceCall, ISession, SessionRequirement} from "index"
 
 export default class Session extends Extension {
 	protected readonly extensionName = "Session"

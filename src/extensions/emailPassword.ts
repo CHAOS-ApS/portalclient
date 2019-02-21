@@ -1,7 +1,4 @@
-import {HttpMethod, IServiceCall, SessionRequirement} from "../serviceCall"
-import {AuthenticationExtension} from "./extension"
-import {IBooleanResult} from "../data"
-import {IUser} from "./user"
+import {HttpMethod, IServiceCall, SessionRequirement, AuthenticationExtension, IBooleanResult, IUser} from "index"
 
 export default class EmailPassword extends AuthenticationExtension {
 	public readonly authenticationType = "EmailPassword"

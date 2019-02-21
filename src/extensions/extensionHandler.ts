@@ -1,5 +1,4 @@
-import PortalClient from "../portalClient"
-import {IExtension, IExtensionConstructor} from "./extension"
+import PortalClient, {IExtension, IExtensionConstructor} from "index"
 import Session from "./session"
 import User from "./user"
 import EmailPassword from "./emailPassword"

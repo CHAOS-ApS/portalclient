@@ -1,5 +1,4 @@
-import PortalClient from "./portalClient"
-import {IPagedPortalResult, IPortalResponse} from "./data"
+import PortalClient, {IPagedPortalResult, IPortalResponse} from "index"
 
 export class ServiceCall<T> implements IServiceCall<T> {
 	private static readonly sessionParameterName = "sessionGUID"

@@ -1,7 +1,4 @@
-import {HttpMethod, IServiceCall, SessionRequirement} from "../serviceCall"
-import {AuthenticationExtension} from "./extension"
-import {IBooleanResult} from "../data"
-import {IUser} from "./user"
+import {AuthenticationExtension, HttpMethod, IBooleanResult, IServiceCall, IUser, SessionRequirement} from "index"
 
 export default class SecureCookie extends AuthenticationExtension {
 	public readonly authenticationType = "SecureCookie"
