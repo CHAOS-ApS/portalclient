@@ -116,7 +116,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 						parameters[key] = ServiceCall.dateToIsoString(value)
 					else if (value instanceof String || value instanceof Number)
 						parameters[key] = value.toString()
-					else
+					else if (!(value instanceof Blob)) // Don't encode Blobs (including Files)
 						parameters[key] = JSON.stringify(value)
 					break
 				case "symbol":
