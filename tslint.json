@@ -1,13 +1,13 @@
 {
-    "defaultSeverity": "error",
-    "extends": [
-        "tslint:recommended"
-    ],
-    "jsRules": {},
-    "rules": {
+	"defaultSeverity": "error",
+	"extends": [
+		"tslint:recommended"
+	],
+	"jsRules": {},
+	"rules": {
 		"arrow-parens": [true, "ban-single-arg-parens"],
 		"curly": [true, "as-needed"],
-        "indent": [true, "tabs"],
+		"indent": [true, "tabs"],
 		"quotemark": [true, "double"],
 		"semicolon": [true, "never"],
 		"max-line-length": [true, 200],
@@ -22,5 +22,5 @@
 		"no-consecutive-blank-lines": [false],
 		"trailing-comma": false
 	},
-    "rulesDirectory": []
+	"rulesDirectory": []
 }
