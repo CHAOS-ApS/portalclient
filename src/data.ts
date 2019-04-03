@@ -1,7 +1,7 @@
 export enum SessionRequirement {
 	none,
 	basic,
-	authenticated,
+	authenticated
 }
 
 export enum HttpMethod {

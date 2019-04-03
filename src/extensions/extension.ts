@@ -1,6 +1,6 @@
 // tslint:disable:max-classes-per-file
 
-import PortalClient, {ExtensionHandler, HttpMethod, IServiceParameters, SessionRequirement, ISession} from "../index"
+import PortalClient, {ExtensionHandler, HttpMethod, IServiceParameters, ISession, SessionRequirement} from "../index"
 import {ServiceCall} from "../serviceCall"
 
 export type IExtensionConstructor<T extends IExtension> = new (client: PortalClient) => T
@@ -16,6 +16,7 @@ export default abstract class Extension implements IExtension {
 
 	}
 
+	// tslint:disable-next-line:max-line-length
 	protected call<T>(methodName: string, parameters: IServiceParameters | null = null, method: HttpMethod = HttpMethod.Get, sessionRequirement: SessionRequirement = SessionRequirement.basic): ServiceCall<T> {
 		return new ServiceCall<T>(this.client, `${this.extensionName}/${methodName}`, parameters, method, sessionRequirement)
 	}

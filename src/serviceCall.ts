@@ -1,4 +1,4 @@
-import PortalClient, {IServiceParameters, SessionRequirement, IServiceError, IServiceCall, HttpMethod} from "./index"
+import PortalClient, {HttpMethod, IServiceCall, IServiceError, IServiceParameters, SessionRequirement} from "./index"
 
 export class ServiceCall<T> implements IServiceCall<T> {
 	private static readonly sessionParameterName = "sessionGUID"
@@ -6,6 +6,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 	private static readonly formatParameterValue = "json3"
 
 	public readonly response: Promise<T>
+	// tslint:disable-next-line:variable-name
 	private _error: IServiceError | null = null
 
 	private readonly client: PortalClient
@@ -39,14 +40,13 @@ export class ServiceCall<T> implements IServiceCall<T> {
 			redirect: "follow",
 		}
 
-		if (method === HttpMethod.Get) {
+		if (method === HttpMethod.Get)
 			url.search = new URLSearchParams(parameters).toString()
-		}
-		else if(method === HttpMethod.Post) {
+		else if (method === HttpMethod.Post) {
 			const body = new FormData()
 			Object.keys(parameters).forEach(key => body!.append(key, parameters![key]))
 			request.body = body
-		} else if(method === HttpMethod.PostJson) {
+		} else if (method === HttpMethod.PostJson) {
 			request.body = JSON.stringify(parameters)
 			request.headers = {"Content-Type": "application/json"}
 		} else
@@ -74,7 +74,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 		if (response.ok)
 			return response.json()
 
-		if(response.status === 400)
+		if (response.status === 400)
 			return response.json().then(error => {
 				this._error = error as IServiceError
 				throw new Error(this._error.Message)
@@ -128,7 +128,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 	private static createServiceErrorFromString(message: string): IServiceError {
 		return {
 			Code: "",
-			Message: message
+			Message: message,
 		}
 	}
 
