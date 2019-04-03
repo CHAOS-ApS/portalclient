@@ -1,29 +1,32 @@
-export interface IPortalResponse<TBody> {
-	Header: IHeader | null
-	Body: TBody | null
-	Error: IError | null
+export enum SessionRequirement {
+	none,
+	basic,
+	authenticated,
 }
 
-export interface IHeader {
-	Duration: number
+export enum HttpMethod {
+	Get,
+	Post,
+	PostJson
 }
 
-export interface IPagedPortalResult<T> {
-	Count: number
-	TotalCount: number
-	Results: T[]
+export interface IServiceCall<T> {
+	readonly response: Promise<T>
+	readonly error: IServiceError | null
 }
 
-export interface IError {
-	Fullname: string
+export interface IServiceParameters {
+	[index: string]: any
+}
+
+export interface IServiceError {
+	Code: string
 	Message: string
-	Stacktrace?: string
-	InnerException?: IError
 }
 
 export interface ISession {
 	Id: string
-	UserGuid: string
+	UserGuid?: string
 	DateCreated: number
 	DateModified: number
 }

@@ -9,8 +9,7 @@ export {Extension, IExtension, IExtensionConstructor}
 export {AuthenticationExtension}
 export {ExtensionHandler}
 
-export {HttpMethod, IParameters, IServiceCall, SessionRequirement} from "./serviceCall"
-export {ISession, IBooleanResult, IError, IHeader, IPagedPortalResult, IPortalResponse} from "./data"
+export {ISession, IBooleanResult, HttpMethod, IServiceCall, IServiceError, IServiceParameters, SessionRequirement} from "./data"
 export {IAuthKey} from "./extensions/authKey"
 export {ILoginEndPoint} from "./extensions/oauth"
 export {IUser} from "./extensions/user"

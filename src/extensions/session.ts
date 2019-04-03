@@ -5,22 +5,22 @@ export default class Session extends Extension {
 
 	public create(): IServiceCall<ISession> {
 		return this.onSuccess(this.call<ISession>("Create", null, HttpMethod.Get, SessionRequirement.none),
-			r => this.client.updateSession(r[0]))
+			r => this.updateSession(r))
 	}
 
 	public get(): IServiceCall<ISession> {
 		return this.onSuccess(this.call<ISession>("Get", null, HttpMethod.Get, SessionRequirement.none),
-			r => this.client.updateSession(r[0]))
+			r => this.updateSession(r))
 	}
 
 	public update(): IServiceCall<ISession> {
 		return this.onSuccess(this.call<ISession>("Update", null, HttpMethod.Get, SessionRequirement.none),
-			r => this.client.updateSession(r[0]))
+			r => this.updateSession(r))
 	}
 
 	public delete(): IServiceCall<ISession> {
 		return this.onSuccess(this.call<ISession>("Delete", null, HttpMethod.Get, SessionRequirement.none),
-			r => this.client.updateSession(null))
+			r => this.clearSession())
 	}
 }
 

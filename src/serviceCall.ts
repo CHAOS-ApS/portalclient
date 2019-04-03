@@ -1,68 +1,61 @@
-import PortalClient, {IPagedPortalResult, IPortalResponse} from "./index"
+import PortalClient, {IServiceParameters, SessionRequirement, IServiceError, IServiceCall, HttpMethod} from "./index"
 
 export class ServiceCall<T> implements IServiceCall<T> {
-
-	public get results(): Promise<T[]> {
-		return this.response.then(r => {
-			if (r.Error !== null)
-				throw new Error(r.Error.Message)
-			return r.Body!.Results
-		})
-	}
-
-	public get singleResult(): Promise<T> {
-		return this.results.then(r => {
-			if (r.length === 0)
-				throw new Error("No results returned")
-
-			if (r.length !== 1)
-				throw new Error(`More than 1 result reutned (${r.length})`)
-
-			return r[0]
-		})
-	}
 	private static readonly sessionParameterName = "sessionGUID"
 	private static readonly formatParameterName = "format"
 	private static readonly formatParameterValue = "json3"
 
-	public readonly response: Promise<IPortalResponse<IPagedPortalResult<T>>>
+	public readonly response: Promise<T>
+	private _error: IServiceError | null = null
 
 	private readonly client: PortalClient
 
-	constructor(client: PortalClient, path: string, parameters: IParameters | null = null, method: HttpMethod, sessionRequirement: SessionRequirement) {
+	public get error(): IServiceError | null {
+		return this._error
+	}
+
+	constructor(client: PortalClient, path: string, parameters: IServiceParameters | null = null, method: HttpMethod, sessionRequirement: SessionRequirement, protocolVersion?: string) {
 		this.client = client
 
 		this.response = this.createFetch(path, parameters, method, sessionRequirement)
 			.then(r => this.createResponse(r))
-			.catch(reason => this.createErrorResponse(reason))
+			.catch(reason => {
+				this._error = ServiceCall.createServiceError(reason)
+				throw reason
+			})
 	}
 
-	private createFetch(path: string, parameters: IParameters | null, method: HttpMethod, sessionRequirement: SessionRequirement): Promise<Response> {
-		const url = new URL(this.getUrlToExtension(path))
+	private createFetch(path: string, parameters: IServiceParameters | null, method: HttpMethod, sessionRequirement: SessionRequirement, protocolVersion?: string): Promise<Response> {
+		const url = new URL(this.getUrlToExtension(path, protocolVersion))
 		parameters = ServiceCall.handleStandardParameters(parameters)
 		this.handleSessionParameter(path, parameters, sessionRequirement)
 		this.encodeParameters(parameters)
 
-		let body: FormData | undefined
-
-		if (method === HttpMethod.Get)
-			url.search = new URLSearchParams(parameters).toString()
-		else {
-			body = new FormData()
-			Object.keys(parameters).forEach(key => body!.append(key, parameters![key]))
+		const request: RequestInit = {
+			method: method === HttpMethod.Get ? "GET" : "POST",
+			mode: "cors",
+			cache: "no-cache",
+			credentials: "omit",
+			redirect: "follow",
 		}
 
-		return fetch(url.toString(),
-			{
-				method: method === HttpMethod.Get ? "GET" : "POST",
-				mode: "cors",
-				cache: "no-cache",
-				credentials: "omit",
-				body,
-			})
+		if (method === HttpMethod.Get) {
+			url.search = new URLSearchParams(parameters).toString()
+		}
+		else if(method === HttpMethod.Post) {
+			const body = new FormData()
+			Object.keys(parameters).forEach(key => body!.append(key, parameters![key]))
+			request.body = body
+		} else if(method === HttpMethod.PostJson) {
+			request.body = JSON.stringify(parameters)
+			request.headers = {"Content-Type": "application/json"}
+		} else
+			throw new Error("Unknown http method: " + method)
+
+		return fetch(url.toString(), request)
 	}
 
-	private handleSessionParameter(path: string, parameters: IParameters, sessionRequirement: SessionRequirement): void {
+	private handleSessionParameter(path: string, parameters: IServiceParameters, sessionRequirement: SessionRequirement): void {
 		if (sessionRequirement !== SessionRequirement.none) {
 			if (!this.client.hasSession)
 				throw new Error(`A session is required for "${path}"`)
@@ -73,32 +66,26 @@ export class ServiceCall<T> implements IServiceCall<T> {
 		}
 	}
 
-	private getUrlToExtension(path: string): string {
-		return this.client.servicePath + "v" + this.client.protocolVersion.toString(10) + "/" + path
+	private getUrlToExtension(path: string, protocolVersion?: string): string {
+		return this.client.servicePath + "v" + (protocolVersion !== undefined ? protocolVersion : this.client.defaultProtocolVersion) + "/" + path
 	}
 
-	private createResponse(response: Response): Promise<IPortalResponse<IPagedPortalResult<T>>> {
-		return response.json()
-			.then(r => {
-				if (r.Error !== null && r.Error.Fullname === null)
-					r.Error = null
+	private createResponse(response: Response): Promise<T> {
+		if (response.ok)
+			return response.json()
 
-				return r
+		if(response.status === 400)
+			return response.json().then(error => {
+				this._error = error as IServiceError
+				throw new Error(this._error.Message)
 			})
+
+		this._error = ServiceCall.createServiceErrorFromString(`Service returned ${response.status}: ${response.statusText}`)
+
+		return Promise.reject(this._error.Message)
 	}
 
-	private createErrorResponse(reason: string): IPortalResponse<IPagedPortalResult<T>> {
-		return {
-			Header: null,
-			Body: null,
-			Error: {
-				Fullname: "FetchError",
-				Message: reason,
-			},
-		}
-	}
-
-	private encodeParameters(parameters: IParameters) {
+	private encodeParameters(parameters: IServiceParameters) {
 		for (const key in parameters) { // tslint:disable-line:forin
 			const value = parameters[key]
 
@@ -116,7 +103,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 						parameters[key] = ServiceCall.dateToIsoString(value)
 					else if (value instanceof String || value instanceof Number)
 						parameters[key] = value.toString()
-					else if (!(value instanceof Blob)) // Don't encode Blobs (including Files)
+					else if (!(value instanceof Blob)) // Don"t encode Blobs (including Files)
 						parameters[key] = JSON.stringify(value)
 					break
 				case "symbol":
@@ -134,7 +121,18 @@ export class ServiceCall<T> implements IServiceCall<T> {
 		return value.toISOString().slice(0, -1) + "0000Z"
 	}
 
-	private static handleStandardParameters(parameters: IParameters | null): IParameters {
+	private static createServiceError(reason: Error): IServiceError {
+		return this.createServiceErrorFromString(reason.message)
+	}
+
+	private static createServiceErrorFromString(message: string): IServiceError {
+		return {
+			Code: "",
+			Message: message
+		}
+	}
+
+	private static handleStandardParameters(parameters: IServiceParameters | null): IServiceParameters {
 		if (parameters === null)
 			parameters = {}
 
@@ -142,25 +140,4 @@ export class ServiceCall<T> implements IServiceCall<T> {
 
 		return parameters
 	}
-}
-
-export interface IServiceCall<T> {
-	readonly response: Promise<IPortalResponse<IPagedPortalResult<T>>>
-	readonly results: Promise<T[]>
-	readonly singleResult: Promise<T>
-}
-
-export interface IParameters {
-	[index: string]: any
-}
-
-export enum SessionRequirement {
-	none,
-	basic,
-	authenticated,
-}
-
-export enum HttpMethod {
-	Get,
-	Post,
 }

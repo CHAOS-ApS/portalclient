@@ -9,15 +9,15 @@ export default class PortalClient {
 	// tslint:disable-next-line
 	private _session: RepeatedPromise<ISession | null>
 	// tslint:disable-next-line
-	private readonly _protocolVersion: number = 6
+	private readonly _defaultProtocolVersion: string
 	private authenticationType: RepeatedPromise<string | null>
 
 	private whenSessionIsAvailable!: Promise<void>
 	private whenSessionIsAuthenticated!: Promise<string>
 
-	constructor(servicePath: string, protocolVersion: number = 6) {
+	constructor(servicePath: string, defaultProtocolVersion: string) {
 		this.servicePath = PortalClient.getServicePath(servicePath)
-		this._protocolVersion = protocolVersion
+		this._defaultProtocolVersion = defaultProtocolVersion
 		this._session = new RepeatedPromise<ISession | null>(null)
 		this.authenticationType = new RepeatedPromise<string | null>(null)
 		this.call = new ExtensionHandler(this)
@@ -31,8 +31,8 @@ export default class PortalClient {
 		return this._session.value
 	}
 
-	public get protocolVersion(): number {
-		return this._protocolVersion
+	public get defaultProtocolVersion(): string {
+		return this._defaultProtocolVersion
 	}
 
 	public get isAuthenticated(): boolean {
