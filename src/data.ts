@@ -37,3 +37,5 @@ export interface ISession {
 export interface IBooleanResult {
 	WasSuccess: boolean
 }
+
+export interface IEmptyResult {}
