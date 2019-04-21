@@ -22,6 +22,7 @@ export interface IServiceParameters {
 export interface IServiceError {
 	Code: string
 	Message: string
+	ErrorCode: number | null
 }
 
 export interface ISession {

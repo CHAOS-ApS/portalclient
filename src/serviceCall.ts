@@ -29,33 +29,31 @@ export class ServiceCall<T> implements IServiceCall<T> {
 	private createFetch(path: string, parameters: IServiceParameters | null, method: HttpMethod, sessionRequirement: SessionRequirement, protocolVersion?: string): Promise<Response> {
 		const url = new URL(this.getUrlToExtension(path, protocolVersion))
 		parameters = ServiceCall.handleStandardParameters(parameters)
-		this.handleSessionParameter(path, parameters, sessionRequirement)
-		this.encodeParameters(parameters)
+		ServiceCall.encodeParameters(parameters)
 
-		const request: RequestInit = {
-			method: method === HttpMethod.Get ? "GET" : "POST",
-			mode: "cors",
-			cache: "no-cache",
-			credentials: "omit",
-			redirect: "follow",
+		const request = ServiceCall.createRequest(method)
+
+		switch (method) {
+			case HttpMethod.Get:
+				url.search = new URLSearchParams(this.handleSessionParameter(path, parameters, sessionRequirement)).toString()
+				break
+			case HttpMethod.Post:
+				url.search = new URLSearchParams(this.handleSessionParameter(path, [], sessionRequirement)).toString()
+				request.body = ServiceCall.createFormDataBody(parameters)
+				break
+			case HttpMethod.PostJson:
+				url.search = new URLSearchParams(this.handleSessionParameter(path, [], sessionRequirement)).toString()
+				request.body = JSON.stringify(parameters)
+				request.headers = {"Content-Type": "application/json"}
+				break
+			default:
+				throw new Error("Unknown http method: " + method)
 		}
-
-		if (method === HttpMethod.Get)
-			url.search = new URLSearchParams(parameters).toString()
-		else if (method === HttpMethod.Post) {
-			const body = new FormData()
-			Object.keys(parameters).forEach(key => body!.append(key, parameters![key]))
-			request.body = body
-		} else if (method === HttpMethod.PostJson) {
-			request.body = JSON.stringify(parameters)
-			request.headers = {"Content-Type": "application/json"}
-		} else
-			throw new Error("Unknown http method: " + method)
 
 		return fetch(url.toString(), request)
 	}
 
-	private handleSessionParameter(path: string, parameters: IServiceParameters, sessionRequirement: SessionRequirement): void {
+	private handleSessionParameter(path: string, parameters: IServiceParameters, sessionRequirement: SessionRequirement): IServiceParameters {
 		if (sessionRequirement !== SessionRequirement.none) {
 			if (!this.client.hasSession)
 				throw new Error(`A session is required for "${path}"`)
@@ -64,6 +62,8 @@ export class ServiceCall<T> implements IServiceCall<T> {
 			if (sessionRequirement === SessionRequirement.authenticated && !this.client.isAuthenticated)
 				throw new Error(`An authenticated session is required for "${path}"`)
 		}
+
+		return parameters
 	}
 
 	private getUrlToExtension(path: string, protocolVersion?: string): string {
@@ -75,30 +75,31 @@ export class ServiceCall<T> implements IServiceCall<T> {
 			return response.json()
 
 		if (response.status === 400)
-			return response.json().then(error => {
-					this._error = error as IServiceError
-					throw new Error(this._error.Message)
-				}, reason => {
-					this._error = ServiceCall.createServiceErrorFromString("Failed to parse error object from 400 response: " + reason)
-					throw new Error(this._error.Message)
-				})
+			return this.handleError(response, reason => ServiceCall.createServiceErrorFromString("Failed to parse error object from 400 response: " + reason))
 
 		if (response.status === 500)
-			return response.json()
-				.then(error => {
-					this._error = error as IServiceError
-					throw new Error(this._error.Message)
-				}, reason => {
-					this._error = ServiceCall.createServiceErrorFromResponse(response)
-					throw new Error(this._error.Message)
-				})
+			return this.handleError(response, () => ServiceCall.createServiceErrorFromResponse(response))
 
 		this._error = ServiceCall.createServiceErrorFromResponse(response)
 
 		return Promise.reject(this._error!.Message)
 	}
 
-	private encodeParameters(parameters: IServiceParameters) {
+	private handleError(response: Response, createError: (reason: string) => IServiceError): Promise<T> {
+		return response.json().then(error => {
+			this._error = error as IServiceError
+			throw new Error(this._error.Message)
+		}, reason => {
+			this._error = createError(reason)
+			throw new Error(this._error.Message)
+		})
+	}
+
+	public static dateToIsoString(value: Date): string {
+		return value.toISOString().slice(0, -1) + "0000Z"
+	}
+
+	private static encodeParameters(parameters: IServiceParameters) {
 		for (const key in parameters) { // tslint:disable-line:forin
 			const value = parameters[key]
 
@@ -130,14 +131,27 @@ export class ServiceCall<T> implements IServiceCall<T> {
 		}
 	}
 
-	public static dateToIsoString(value: Date): string {
-		return value.toISOString().slice(0, -1) + "0000Z"
+	private static createRequest(method: HttpMethod): RequestInit {
+		return {
+			method: method === HttpMethod.Get ? "GET" : "POST",
+			mode: "cors",
+			cache: "no-cache",
+			credentials: "omit",
+			redirect: "follow",
+		}
+	}
+
+	private static createFormDataBody(parameters: IServiceParameters): FormData {
+		const body = new FormData()
+		Object.keys(parameters).forEach(key => body!.append(key, parameters![key]))
+		return body
 	}
 
 	private static createServiceErrorFromString(message: string): IServiceError {
 		return {
 			Code: "",
 			Message: message,
+			ErrorCode: null
 		}
 	}
 
