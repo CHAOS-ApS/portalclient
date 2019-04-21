@@ -7,7 +7,9 @@ export enum SessionRequirement {
 export enum HttpMethod {
 	Get,
 	Post,
-	PostJson
+	PostJson,
+	PutJson,
+	Delete
 }
 
 export interface IServiceCall<T> {

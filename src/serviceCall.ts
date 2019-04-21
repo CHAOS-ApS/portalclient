@@ -35,6 +35,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 
 		switch (method) {
 			case HttpMethod.Get:
+			case HttpMethod.Delete:
 				url.search = new URLSearchParams(this.handleSessionParameter(path, parameters, sessionRequirement)).toString()
 				break
 			case HttpMethod.Post:
@@ -42,6 +43,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 				request.body = ServiceCall.createFormDataBody(parameters)
 				break
 			case HttpMethod.PostJson:
+			case HttpMethod.PutJson:
 				url.search = new URLSearchParams(this.handleSessionParameter(path, [], sessionRequirement)).toString()
 				request.body = JSON.stringify(parameters)
 				request.headers = {"Content-Type": "application/json"}
@@ -74,7 +76,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 		if (response.ok)
 			return response.json()
 
-		if (response.status === 400)
+		if (response.status === 400 || response.status === 401)
 			return this.handleError(response, reason => ServiceCall.createServiceErrorFromString("Failed to parse error object from 400 response: " + reason))
 
 		if (response.status === 500)
@@ -133,11 +135,25 @@ export class ServiceCall<T> implements IServiceCall<T> {
 
 	private static createRequest(method: HttpMethod): RequestInit {
 		return {
-			method: method === HttpMethod.Get ? "GET" : "POST",
+			method: this.getMethodString(method),
 			mode: "cors",
 			cache: "no-cache",
 			credentials: "omit",
 			redirect: "follow",
+		}
+	}
+
+	private static getMethodString(method: HttpMethod): string {
+		switch (method) {
+			case HttpMethod.Get:
+				return "GET"
+			case HttpMethod.Delete:
+				return "DELETE"
+			case HttpMethod.PostJson:
+			case HttpMethod.Post:
+				return "POST"
+			case HttpMethod.PutJson:
+				return "PUT"
 		}
 	}
 

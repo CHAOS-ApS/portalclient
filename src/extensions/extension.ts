@@ -17,8 +17,9 @@ export default abstract class Extension implements IExtension {
 	}
 
 	// tslint:disable-next-line:max-line-length
-	protected call<T>(methodName: string, parameters: IServiceParameters | null = null, method: HttpMethod = HttpMethod.Get, sessionRequirement: SessionRequirement = SessionRequirement.basic): ServiceCall<T> {
-		return new ServiceCall<T>(this.client, `${this.extensionName}/${methodName}`, parameters, method, sessionRequirement)
+	protected call<T>(methodName: string | null, parameters: IServiceParameters | null = null, method: HttpMethod = HttpMethod.Get, sessionRequirement: SessionRequirement = SessionRequirement.basic): ServiceCall<T> {
+		const path = methodName !== null ? `${this.extensionName}/${methodName}` : this.extensionName
+		return new ServiceCall<T>(this.client, path, parameters, method, sessionRequirement)
 	}
 
 	protected onSuccess<T>(call: ServiceCall<T>, onSuccess: (value: T) => void): ServiceCall<T> {
