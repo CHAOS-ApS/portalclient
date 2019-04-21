@@ -46,5 +46,13 @@ export default abstract class Extension implements IExtension {
 	public static add<T>(extensionConstructor: IExtensionConstructor<T>, extensionName: string): void {
 		ExtensionHandler.add(extensionConstructor, extensionName)
 	}
+
+	protected static dateToIsoString(value: Date): string {
+		return ServiceCall.dateToIsoString(value)
+	}
+
+	protected static encodeParameter(value: string): string | number | Blob | null {
+		return ServiceCall.encodeParameter(value)
+	}
 }
 

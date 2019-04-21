@@ -101,35 +101,47 @@ export class ServiceCall<T> implements IServiceCall<T> {
 		return value.toISOString().slice(0, -1) + "0000Z"
 	}
 
+	public static encodeParameter(value: any): string | number | Blob | null {
+		if (value === null)
+			return null
+
+		switch (typeof value) {
+			case "number":
+			case "string":
+				return value
+			case "boolean":
+				return value ? "True" : "False"
+			case "object":
+				if (value instanceof Date)
+					return ServiceCall.dateToIsoString(value)
+				else if (value instanceof String)
+					return value.toString()
+				else if (value instanceof Number)
+					return value.valueOf()
+				else if (!(value instanceof Blob)) // Don"t encode Blobs (including Files)
+					return JSON.stringify(value)
+				return value
+			case "symbol":
+				throw new Error("A Symbol is not a valid parameter")
+			case "function":
+				throw new Error("A Function not a valid parameter")
+			case "undefined":
+				throw new Error("A undefined value is not a valid parameter")
+		}
+
+		throw new Error(`Can't encode unknown parameter of type: ${typeof value}` )
+	}
+
 	private static encodeParameters(parameters: IServiceParameters) {
 		for (const key in parameters) { // tslint:disable-line:forin
 			const value = parameters[key]
 
-			if (value === undefined || value === null) {
+			if (value === undefined) {
 				delete parameters[key]
 				continue
 			}
 
-			switch (typeof value) {
-				case "boolean":
-					parameters[key] = value ? "True" : "False"
-					break
-				case "object":
-					if (value instanceof Date)
-						parameters[key] = ServiceCall.dateToIsoString(value)
-					else if (value instanceof String || value instanceof Number)
-						parameters[key] = value.toString()
-					else if (!(value instanceof Blob)) // Don"t encode Blobs (including Files)
-						parameters[key] = JSON.stringify(value)
-					break
-				case "symbol":
-					throw new Error("A Symbol is not a valid parameter")
-				case "function":
-					throw new Error("A Function not a valid parameter")
-				case "number":
-					break
-			}
-
+			parameters[key] = this.encodeParameter(parameters[key])
 		}
 	}
 
