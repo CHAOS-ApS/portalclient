@@ -76,13 +76,26 @@ export class ServiceCall<T> implements IServiceCall<T> {
 
 		if (response.status === 400)
 			return response.json().then(error => {
-				this._error = error as IServiceError
-				throw new Error(this._error.Message)
-			})
+					this._error = error as IServiceError
+					throw new Error(this._error.Message)
+				}, reason => {
+					this._error = ServiceCall.createServiceErrorFromString("Failed to parse error object from 400 response: " + reason)
+					throw new Error(this._error.Message)
+				})
 
-		this._error = ServiceCall.createServiceErrorFromString(`Service returned ${response.status}: ${response.statusText}`)
+		if (response.status === 500)
+			return response.json()
+				.then(error => {
+					this._error = error as IServiceError
+					throw new Error(this._error.Message)
+				}, reason => {
+					this._error = ServiceCall.createServiceErrorFromResponse(response)
+					throw new Error(this._error.Message)
+				})
 
-		return Promise.reject(this._error.Message)
+		this._error = ServiceCall.createServiceErrorFromResponse(response)
+
+		return Promise.reject(this._error!.Message)
 	}
 
 	private encodeParameters(parameters: IServiceParameters) {
@@ -121,15 +134,19 @@ export class ServiceCall<T> implements IServiceCall<T> {
 		return value.toISOString().slice(0, -1) + "0000Z"
 	}
 
-	private static createServiceError(reason: Error): IServiceError {
-		return this.createServiceErrorFromString(reason.message)
-	}
-
 	private static createServiceErrorFromString(message: string): IServiceError {
 		return {
 			Code: "",
 			Message: message,
 		}
+	}
+
+	private static createServiceError(error: Error): IServiceError {
+		return this.createServiceErrorFromString(error.message)
+	}
+
+	private static createServiceErrorFromResponse(response: Response): IServiceError {
+		return ServiceCall.createServiceErrorFromString(`Service returned ${response.status}: ${response.statusText}`)
 	}
 
 	private static handleStandardParameters(parameters: IServiceParameters | null): IServiceParameters {
