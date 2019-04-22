@@ -1,6 +1,6 @@
 {
 	"name": "@chaosinsight/portalclient",
-	"version": "3.4.3",
+	"version": "3.4.4",
 	"license": "MIT",
 	"description": "A Typescript / Javascript client for the Portal api",
 	"homepage": "https://github.com/CHAOS-ApS/portalclient",
