@@ -39,6 +39,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 				url.search = new URLSearchParams(this.handleSessionParameter(path, parameters, sessionRequirement)).toString()
 				break
 			case HttpMethod.Post:
+			case HttpMethod.Put:
 				url.search = new URLSearchParams(this.handleSessionParameter(path, [], sessionRequirement)).toString()
 				request.body = ServiceCall.createFormDataBody(parameters)
 				break
@@ -161,9 +162,10 @@ export class ServiceCall<T> implements IServiceCall<T> {
 				return "GET"
 			case HttpMethod.Delete:
 				return "DELETE"
-			case HttpMethod.PostJson:
 			case HttpMethod.Post:
+			case HttpMethod.PostJson:
 				return "POST"
+			case HttpMethod.Put:
 			case HttpMethod.PutJson:
 				return "PUT"
 		}
