@@ -40,12 +40,12 @@ export class ServiceCall<T> implements IServiceCall<T> {
 				break
 			case HttpMethod.Post:
 			case HttpMethod.Put:
-				url.search = new URLSearchParams(this.handleSessionParameter(path, [], sessionRequirement)).toString()
+				url.search = new URLSearchParams(this.handleSessionParameter(path, {}, sessionRequirement)).toString()
 				request.body = ServiceCall.createFormDataBody(parameters)
 				break
 			case HttpMethod.PostJson:
 			case HttpMethod.PutJson:
-				url.search = new URLSearchParams(this.handleSessionParameter(path, [], sessionRequirement)).toString()
+				url.search = new URLSearchParams(this.handleSessionParameter(path, {}, sessionRequirement)).toString()
 				request.body = JSON.stringify(parameters)
 				request.headers = {"Content-Type": "application/json"}
 				break
