@@ -52,7 +52,7 @@ export default abstract class Extension implements IExtension {
 	}
 
 	protected static encodeParameter(value: string): string | number | Blob | null {
-		return ServiceCall.encodeParameter(value)
+		return ServiceCall.encodeParameter(value, true)
 	}
 }
 

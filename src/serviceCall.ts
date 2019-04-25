@@ -28,24 +28,23 @@ export class ServiceCall<T> implements IServiceCall<T> {
 		const url = new URL(this.getUrlToExtension(path, protocolVersion))
 
 		parameters = parameters !== null
-			? ServiceCall.encodeParameters(parameters)
+			? ServiceCall.encodeParameters(parameters, !ServiceCall.isJson(method))
 			: {}
+
+		url.search = new URLSearchParams(this.handleSessionParameter(path, ServiceCall.hasBody(method) ? {} : parameters, sessionRequirement)).toString()
 
 		const request = ServiceCall.createRequest(method)
 
 		switch (method) {
 			case HttpMethod.Get:
 			case HttpMethod.Delete:
-				url.search = new URLSearchParams(this.handleSessionParameter(path, parameters, sessionRequirement)).toString()
 				break
 			case HttpMethod.Post:
 			case HttpMethod.Put:
-				url.search = new URLSearchParams(this.handleSessionParameter(path, {}, sessionRequirement)).toString()
 				request.body = ServiceCall.createFormDataBody(parameters)
 				break
 			case HttpMethod.PostJson:
 			case HttpMethod.PutJson:
-				url.search = new URLSearchParams(this.handleSessionParameter(path, {}, sessionRequirement)).toString()
 				request.body = JSON.stringify(parameters)
 				request.headers = {"Content-Type": "application/json"}
 				break
@@ -105,7 +104,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 		return value.toISOString().slice(0, -1) + "0000Z"
 	}
 
-	public static encodeParameter(value: any): string | number | Blob | null {
+	public static encodeParameter(value: any, encodeObject: boolean): string | number | Blob | null {
 		if (value === null)
 			return null
 
@@ -122,7 +121,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 					return value.toString()
 				else if (value instanceof Number)
 					return value.valueOf()
-				else if (!(value instanceof Blob)) // Don"t encode Blobs (including Files)
+				else if (encodeObject && !(value instanceof Blob)) // Don"t encode Blobs (including Files)
 					return JSON.stringify(value)
 				return value
 			case "symbol":
@@ -136,7 +135,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 		throw new Error(`Can't encode unknown parameter of type: ${typeof value}` )
 	}
 
-	private static encodeParameters(parameters: IServiceParameters): IServiceParameters {
+	private static encodeParameters(parameters: IServiceParameters, encodeObject: boolean): IServiceParameters {
 		for (const key in parameters) { // tslint:disable-line:forin
 			const value = parameters[key]
 
@@ -145,7 +144,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 				continue
 			}
 
-			parameters[key] = this.encodeParameter(parameters[key])
+			parameters[key] = this.encodeParameter(parameters[key], encodeObject)
 		}
 
 		return parameters
@@ -158,6 +157,32 @@ export class ServiceCall<T> implements IServiceCall<T> {
 			cache: "no-cache",
 			credentials: "omit",
 			redirect: "follow",
+		}
+	}
+
+	private static hasBody(method: HttpMethod): boolean {
+		switch (method) {
+			case HttpMethod.Get:
+			case HttpMethod.Delete:
+				return false
+			case HttpMethod.Post:
+			case HttpMethod.PostJson:
+			case HttpMethod.Put:
+			case HttpMethod.PutJson:
+				return true
+		}
+	}
+
+	private static isJson(method: HttpMethod): boolean {
+		switch (method) {
+			case HttpMethod.Get:
+			case HttpMethod.Delete:
+			case HttpMethod.Post:
+			case HttpMethod.Put:
+				return false
+			case HttpMethod.PostJson:
+			case HttpMethod.PutJson:
+				return true
 		}
 	}
 
