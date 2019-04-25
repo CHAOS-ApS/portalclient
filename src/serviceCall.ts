@@ -2,8 +2,6 @@ import PortalClient, {HttpMethod, IServiceCall, IServiceError, IServiceParameter
 
 export class ServiceCall<T> implements IServiceCall<T> {
 	private static readonly sessionParameterName = "sessionGUID"
-	private static readonly formatParameterName = "format"
-	private static readonly formatParameterValue = "json3"
 
 	public readonly response: Promise<T>
 	// tslint:disable-next-line:variable-name
@@ -28,8 +26,10 @@ export class ServiceCall<T> implements IServiceCall<T> {
 
 	private createFetch(path: string, parameters: IServiceParameters | null, method: HttpMethod, sessionRequirement: SessionRequirement, protocolVersion?: string): Promise<Response> {
 		const url = new URL(this.getUrlToExtension(path, protocolVersion))
-		parameters = ServiceCall.handleStandardParameters(parameters)
-		ServiceCall.encodeParameters(parameters)
+
+		parameters = parameters !== null
+			? ServiceCall.encodeParameters(parameters)
+			: {}
 
 		const request = ServiceCall.createRequest(method)
 
@@ -136,7 +136,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 		throw new Error(`Can't encode unknown parameter of type: ${typeof value}` )
 	}
 
-	private static encodeParameters(parameters: IServiceParameters) {
+	private static encodeParameters(parameters: IServiceParameters): IServiceParameters {
 		for (const key in parameters) { // tslint:disable-line:forin
 			const value = parameters[key]
 
@@ -147,6 +147,8 @@ export class ServiceCall<T> implements IServiceCall<T> {
 
 			parameters[key] = this.encodeParameter(parameters[key])
 		}
+
+		return parameters
 	}
 
 	private static createRequest(method: HttpMethod): RequestInit {
@@ -194,14 +196,5 @@ export class ServiceCall<T> implements IServiceCall<T> {
 
 	private static createServiceErrorFromResponse(response: Response): IServiceError {
 		return ServiceCall.createServiceErrorFromString(`Service returned ${response.status}: ${response.statusText}`)
-	}
-
-	private static handleStandardParameters(parameters: IServiceParameters | null): IServiceParameters {
-		if (parameters === null)
-			parameters = {}
-
-		parameters[ServiceCall.formatParameterName] = ServiceCall.formatParameterValue
-
-		return parameters
 	}
 }
