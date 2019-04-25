@@ -74,13 +74,16 @@ export class ServiceCall<T> implements IServiceCall<T> {
 	}
 
 	private createResponse(response: Response): Promise<T> {
-		if (response.ok)
+		if (response.ok) {
+			if (response.status === 204)
+				return Promise.resolve() as any as Promise<T>
 			return response.json()
+		}
 
-		if (response.status === 400 || response.status === 401)
-			return this.handleError(response, reason => ServiceCall.createServiceErrorFromString("Failed to parse error object from 400 response: " + reason))
+		if (response.status >= 400 && response.status < 500)
+			return this.handleError(response, reason => ServiceCall.createServiceErrorFromString(`Failed to parse error object from ${response.status} "${response.statusText}" response: ${reason}`))
 
-		if (response.status === 500)
+		if (response.status >= 500 && response.status < 600)
 			return this.handleError(response, () => ServiceCall.createServiceErrorFromResponse(response))
 
 		this._error = ServiceCall.createServiceErrorFromResponse(response)
