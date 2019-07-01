@@ -29,8 +29,7 @@
 	},
 	"dependencies": {},
 	"devDependencies": {
-		"typescript": "3.4.4",
-		"tslint": "5.16.0",
-		"node-fetch": "2.3.0"
+		"typescript": "3.5.2",
+		"tslint": "5.18.0"
 	}
 }

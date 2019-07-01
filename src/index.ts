@@ -10,6 +10,3 @@ export {AuthenticationExtension}
 export {ExtensionHandler}
 
 export {HttpMethod, ISession, IBooleanResult, IEmptyResult, IServiceCall, IServiceError, IServiceParameters, SessionRequirement} from "./data"
-export {IAuthKey} from "./extensions/authKey"
-export {ILoginEndPoint} from "./extensions/oauth"
-export {IUser} from "./extensions/user"
