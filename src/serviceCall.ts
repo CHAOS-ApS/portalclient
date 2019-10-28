@@ -1,7 +1,7 @@
 import PortalClient, {HttpMethod, IServiceCall, IServiceError, IServiceParameters, SessionRequirement} from "./index"
 
 export class ServiceCall<T> implements IServiceCall<T> {
-	private static readonly sessionParameterName = "sessionGUID"
+	private static readonly sessionParameterName = "sessionId"
 
 	public readonly response: Promise<T>
 	// tslint:disable-next-line:variable-name
