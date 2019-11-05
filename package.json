@@ -29,7 +29,7 @@
 	},
 	"dependencies": {},
 	"devDependencies": {
-		"typescript": "3.6.4",
-		"tslint": "5.20.0"
+		"typescript": "3.7.2",
+		"tslint": "5.20.1"
 	}
 }
