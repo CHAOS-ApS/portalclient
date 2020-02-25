@@ -5,6 +5,7 @@
 		"sourceMap": true,
 		"strict": true,
 		"declaration": true,
+		"importsNotUsedAsValues": "error",
 		"baseUrl": "./src/",
 		"outDir": "./dist",
 		"lib": [

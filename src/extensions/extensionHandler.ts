@@ -1,4 +1,5 @@
-import PortalClient, {IExtension, IExtensionConstructor} from "../index"
+import type PortalClient from "../index"
+import type { IExtension, IExtensionConstructor } from "../index"
 
 export default class ExtensionHandler {
 	private extensionMap: {[key: string]: IExtension} = {}
