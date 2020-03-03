@@ -1,4 +1,4 @@
-import PortalClient, {HttpMethod, IServiceCall, IServiceError, IServiceParameters, SessionRequirement} from "./index"
+import PortalClient, {HttpMethod, IServiceCall, IServiceError, IServiceParameters, ServiceError, SessionRequirement} from "./index"
 
 export class ServiceCall<T> implements IServiceCall<T> {
 	private static readonly sessionParameterName = "sessionId"
@@ -16,12 +16,13 @@ export class ServiceCall<T> implements IServiceCall<T> {
 	constructor(client: PortalClient, path: string, parameters: IServiceParameters | null = null, method: HttpMethod, sessionRequirement: SessionRequirement, protocolVersion?: string) {
 		this.client = client
 
-		this.response = this.createFetch(path, parameters, method, sessionRequirement)
-			.then(r => this.createResponse(r))
-			.catch(reason => {
-				this._error = ServiceCall.createServiceError(reason)
-				throw reason
-			})
+		this.response = this.createFetch(path, parameters, method, sessionRequirement, protocolVersion)
+			.then(
+				r => this.createResponse(r),
+				reason => {
+					this._error = ServiceCall.createServiceError(reason)
+					throw reason
+				})
 	}
 
 	private createFetch(path: string, parameters: IServiceParameters | null, method: HttpMethod, sessionRequirement: SessionRequirement, protocolVersion?: string): Promise<Response> {
@@ -87,16 +88,16 @@ export class ServiceCall<T> implements IServiceCall<T> {
 
 		this._error = ServiceCall.createServiceErrorFromResponse(response)
 
-		return Promise.reject(this._error!.Message)
+		return Promise.reject(new ServiceError(this._error))
 	}
 
 	private handleError(response: Response, createError: (reason: string) => IServiceError): Promise<T> {
 		return response.json().then(error => {
 			this._error = error as IServiceError
-			throw new Error(this._error.Message)
+			throw new ServiceError(this._error)
 		}, reason => {
 			this._error = createError(reason)
-			throw new Error(this._error.Message)
+			throw new ServiceError(this._error)
 		})
 	}
 
@@ -210,8 +211,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 	private static createServiceErrorFromString(message: string): IServiceError {
 		return {
 			Code: "",
-			Message: message,
-			ErrorCode: null
+			Message: message
 		}
 	}
 
