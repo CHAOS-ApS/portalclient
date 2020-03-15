@@ -13,9 +13,7 @@ export interface IExtension {
 export default abstract class Extension implements IExtension {
 	protected abstract readonly extensionName: string
 
-	constructor(protected client: PortalClient) {
-
-	}
+	constructor(protected client: PortalClient) {}
 
 	// tslint:disable-next-line:max-line-length
 	protected call<T>(methodName: string | null, parameters: IServiceParameters | null = null, method: HttpMethod = HttpMethod.Get, sessionRequirement: SessionRequirement = SessionRequirement.basic): ServiceCall<T> {

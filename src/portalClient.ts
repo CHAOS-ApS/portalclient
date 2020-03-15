@@ -1,25 +1,21 @@
 import {ExtensionHandler, ISession} from "./index"
-import RepeatedPromise from "./repeatedPromise"
+import NullableRepeatedPromise from "./nullableRepeatedPromise"
 
 export default class PortalClient {
-
 	public readonly servicePath: string
 	public readonly call: ExtensionHandler
 
 	// tslint:disable-next-line
-	private _session: RepeatedPromise<ISession | null>
+	private _session: NullableRepeatedPromise<ISession>
 	// tslint:disable-next-line
 	private readonly _defaultProtocolVersion: string
-	private authenticationType: RepeatedPromise<string | null>
-
-	private whenSessionIsAvailable!: Promise<void>
-	private whenSessionIsAuthenticated!: Promise<string>
+	private authenticationType: NullableRepeatedPromise<string>
 
 	constructor(servicePath: string, defaultProtocolVersion: string) {
 		this.servicePath = PortalClient.getServicePath(servicePath)
 		this._defaultProtocolVersion = defaultProtocolVersion
-		this._session = new RepeatedPromise<ISession | null>(null)
-		this.authenticationType = new RepeatedPromise<string | null>(null)
+		this._session = new NullableRepeatedPromise()
+		this.authenticationType = new NullableRepeatedPromise()
 		this.call = new ExtensionHandler(this)
 	}
 
@@ -40,11 +36,15 @@ export default class PortalClient {
 	}
 
 	public get whenHasSession(): Promise<ISession> {
-		return this._session.whenNotNull() as Promise<ISession>
+		return this._session.whenNotNull()
 	}
 
 	public get whenIsAuthenticated(): Promise<string> {
-		return this.authenticationType.whenNotNull() as Promise<string>
+		return this.authenticationType.whenNotNull()
+	}
+
+	public get whenIsAuthenticatedChange(): Promise<boolean> {
+		return this.authenticationType.promise.then(type => type !== null)
 	}
 
 	public updateSession(session: ISession | null): void {
@@ -52,7 +52,7 @@ export default class PortalClient {
 
 		this._session.value = session
 
-		if (session == null)
+		if (session === null)
 			this.setAuthenticated(null)
 	}
 

@@ -22,10 +22,6 @@ export default class RepeatedPromise<T> {
 		return this._promise
 	}
 
-	public async whenNotNull(): Promise<T> {
-		return this.value !== null ? this.value : await this.promise
-	}
-
 	private initializePromise(): void {
 		this._promise = new Promise(resolve => {
 			this.resolve = resolve
