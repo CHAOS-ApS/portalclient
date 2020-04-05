@@ -1,12 +1,12 @@
-import type {ErrorCode, IServiceError} from "./index"
+import type {IServiceError} from "./index"
 
 export default class ServiceError extends Error {
-	public readonly code: ErrorCode
+	public readonly code: string
 
 	constructor(serviceError: IServiceError) {
 		super(serviceError.Message)
 		this.name = "ServiceError"
-		this.code = serviceError.Code as ErrorCode
+		this.code = serviceError.Code
 		Object.setPrototypeOf(this, ServiceError.prototype)
 	}
 }
