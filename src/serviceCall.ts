@@ -102,7 +102,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 	}
 
 	public static dateToIsoString(value: Date): string {
-		return value.toISOString().slice(0, -1) + "0000Z"
+		return value.toISOString().slice(0, -5) + "Z"
 	}
 
 	public static encodeParameter(value: any, encodeObject: boolean): string | number | Blob | null {
