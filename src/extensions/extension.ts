@@ -22,7 +22,7 @@ export default abstract class Extension implements IExtension {
 	}
 
 	protected onSuccess<T>(call: ServiceCall<T>, onSuccess: (value: T) => void): ServiceCall<T> {
-		call.response.then(onSuccess)
+		call.response.then(onSuccess, () => {}) // Empty catch to prevent unhandled rejections from this branch of the promise
 		return call
 	}
 
