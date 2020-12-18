@@ -16,13 +16,28 @@ export class ServiceCall<T> implements IServiceCall<T> {
 	constructor(client: PortalClient, path: string, parameters: IServiceParameters | null = null, method: HttpMethod, sessionRequirement: SessionRequirement, protocolVersion?: string) {
 		this.client = client
 
-		this.response = this.createFetch(path, parameters, method, sessionRequirement, protocolVersion)
+		const createFetchAndHandle = () => this.createFetch(path, parameters, method, sessionRequirement, protocolVersion)
 			.then(
 				r => this.createResponse(r),
 				reason => {
 					this._error = ServiceCall.createServiceError(reason)
 					throw reason
 				})
+
+		this.response = createFetchAndHandle()
+			.catch(reason => {
+				if (this._error === null || this.client.errorHandler === null)
+					throw reason
+
+				return this.client.errorHandler(this._error)
+					.then(wasHandled => {
+						if (!wasHandled)
+							throw reason
+						return createFetchAndHandle()
+					}, innerReason => {
+						throw new Error("Error handler failed itself: " + innerReason.message)
+					})
+			})
 	}
 
 	private createFetch(path: string, parameters: IServiceParameters | null, method: HttpMethod, sessionRequirement: SessionRequirement, protocolVersion?: string): Promise<Response> {

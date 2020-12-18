@@ -39,3 +39,5 @@ export interface IBooleanResult {
 }
 
 export interface IEmptyResult {}
+
+export type ErrorHandler = (error: IServiceError) => Promise<boolean>
