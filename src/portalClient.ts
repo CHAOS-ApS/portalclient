@@ -10,14 +10,15 @@ export default class PortalClient {
 	private _session: NullableRepeatedPromise<ISession>
 	// tslint:disable-next-line
 	private readonly _defaultProtocolVersion: string
-	private authenticationType: NullableRepeatedPromise<string>
+	// tslint:disable-next-line
+	private _authenticationType: NullableRepeatedPromise<string>
 
 	constructor(servicePath: string, defaultProtocolVersion: string, errorHandler: ErrorHandler | null = null) {
 		this.servicePath = PortalClient.getServicePath(servicePath)
 		this._defaultProtocolVersion = defaultProtocolVersion
 		this.errorHandler = errorHandler
 		this._session = new NullableRepeatedPromise()
-		this.authenticationType = new NullableRepeatedPromise()
+		this._authenticationType = new NullableRepeatedPromise()
 		this.call = new ExtensionHandler(this)
 	}
 
@@ -33,8 +34,12 @@ export default class PortalClient {
 		return this._defaultProtocolVersion
 	}
 
+	public get authenticationType(): string | null {
+		return this._authenticationType.value
+	}
+
 	public get isAuthenticated(): boolean {
-		return this.authenticationType.value !== null
+		return this._authenticationType.value !== null
 	}
 
 	public get whenHasSession(): Promise<ISession> {
@@ -42,16 +47,14 @@ export default class PortalClient {
 	}
 
 	public get whenIsAuthenticated(): Promise<string> {
-		return this.authenticationType.whenNotNull()
+		return this._authenticationType.whenNotNull()
 	}
 
 	public get whenIsAuthenticatedChange(): Promise<boolean> {
-		return this.authenticationType.promise.then(type => type !== null)
+		return this._authenticationType.promise.then(type => type !== null)
 	}
 
 	public updateSession(session: ISession | null): void {
-		PortalClient.fixSession(session)
-
 		this._session.value = session
 
 		if (session === null)
@@ -59,14 +62,7 @@ export default class PortalClient {
 	}
 
 	public setAuthenticated(type: string | null): void {
-		this.authenticationType.value = type
-	}
-
-	private static fixSession(session: ISession | null): void { // Fix if API is old version
-		if (session === null || session.Id)
-			return
-
-		session.Id = (session as any).Guid
+		this._authenticationType.value = type
 	}
 
 	private static getServicePath(value: string): string {
