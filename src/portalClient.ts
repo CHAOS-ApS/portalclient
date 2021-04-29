@@ -55,6 +55,7 @@ export default class PortalClient {
 	}
 
 	public updateSession(session: ISession | null): void {
+		PortalClient.fixSession(session)
 		this._session.value = session
 
 		if (session === null)
@@ -63,6 +64,13 @@ export default class PortalClient {
 
 	public setAuthenticated(type: string | null): void {
 		this._authenticationType.value = type
+	}
+
+	private static fixSession(session: ISession | null): void { // Fix if API is old version
+		if (session === null || session.Id)
+			return
+
+		session.Id = (session as any).Guid
 	}
 
 	private static getServicePath(value: string): string {
