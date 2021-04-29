@@ -5,7 +5,7 @@ export {default as AuthenticationExtension} from "./extensions/authenticationExt
 export {default as ExtensionHandler} from "./extensions/extensionHandler"
 export {HttpMethod, SessionRequirement} from "./data"
 export {default as ErrorCode} from "./errorCode"
-export {default as ServiceError} from "./sericeError"
+export {default as ServiceError} from "./serviceError"
 
 export type {IExtension, IExtensionConstructor} from "./extensions/extension"
 export type {ErrorHandler, ISession, IBooleanResult, IEmptyResult, IServiceCall, IServiceError, IServiceParameters } from "./data"
