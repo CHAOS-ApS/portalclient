@@ -1,8 +1,6 @@
 import PortalClient, {HttpMethod, IServiceCall, IServiceError, IServiceParameters, ServiceError, SessionRequirement} from "./index"
 
 export class ServiceCall<T> implements IServiceCall<T> {
-	private static readonly sessionParameterName = "sessionId"
-
 	public readonly response: Promise<T>
 	// tslint:disable-next-line:variable-name
 	private _error: IServiceError | null = null
@@ -75,7 +73,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 		if (sessionRequirement !== SessionRequirement.none) {
 			if (!this.client.hasSession)
 				throw new Error(`A session is required for "${path}"`)
-			parameters[ServiceCall.sessionParameterName] = this.client.session!.Id
+			parameters[this.client.sessionIdParameterName] = this.client.session!.Id
 
 			if (sessionRequirement === SessionRequirement.authenticated && !this.client.isAuthenticated)
 				throw new Error(`An authenticated session is required for "${path}"`)

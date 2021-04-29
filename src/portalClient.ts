@@ -2,9 +2,12 @@ import {ErrorHandler, ExtensionHandler, ISession} from "./index"
 import NullableRepeatedPromise from "./nullableRepeatedPromise"
 
 export default class PortalClient {
+	private static readonly defaultSessionParameterName = "sessionId"
+
 	public readonly servicePath: string
 	public readonly call: ExtensionHandler
 	public readonly errorHandler: ErrorHandler | null = null
+	public readonly sessionIdParameterName: string
 
 	// tslint:disable-next-line
 	private _session: NullableRepeatedPromise<ISession>
@@ -13,10 +16,11 @@ export default class PortalClient {
 	// tslint:disable-next-line
 	private _authenticationType: NullableRepeatedPromise<string>
 
-	constructor(servicePath: string, defaultProtocolVersion: string, errorHandler: ErrorHandler | null = null) {
+	constructor(servicePath: string, defaultProtocolVersion: string, errorHandler: ErrorHandler | null = null, sessionIdParameterName: string = PortalClient.defaultSessionParameterName) {
 		this.servicePath = PortalClient.getServicePath(servicePath)
 		this._defaultProtocolVersion = defaultProtocolVersion
 		this.errorHandler = errorHandler
+		this.sessionIdParameterName = sessionIdParameterName
 		this._session = new NullableRepeatedPromise()
 		this._authenticationType = new NullableRepeatedPromise()
 		this.call = new ExtensionHandler(this)
