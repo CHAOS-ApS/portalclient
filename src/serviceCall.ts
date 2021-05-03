@@ -45,7 +45,10 @@ export class ServiceCall<T> implements IServiceCall<T> {
 			? ServiceCall.encodeParameters(parameters, !ServiceCall.isJson(method))
 			: {}
 
-		url.search = new URLSearchParams(this.handleSessionParameter(path, ServiceCall.hasBody(method) ? {} : parameters, sessionRequirement)).toString()
+		if (this.client.sessionIdMatchedCallMethod && ServiceCall.hasBody(method))
+			parameters = this.handleSessionParameter(path, parameters, sessionRequirement)
+		else
+			url.search = new URLSearchParams(this.handleSessionParameter(path, ServiceCall.hasBody(method) ? {} : parameters, sessionRequirement)).toString()
 
 		const request = ServiceCall.createRequest(method)
 
