@@ -3,24 +3,52 @@
 	"extends": [
 		"tslint:recommended"
 	],
-	"jsRules": {},
+	"linterOptions": {
+		"exclude": [
+			"node_modules/**"
+		]
+	},
 	"rules": {
+		"array-type": [true, "array-simple"],
 		"arrow-parens": [true, "ban-single-arg-parens"],
 		"curly": [true, "as-needed"],
 		"indent": [true, "tabs"],
 		"quotemark": [true, "double"],
 		"semicolon": [true, "never"],
-		"max-line-length": [true, 200],
-		"member-ordering": [true, {"order": "instance-sandwich"}],
-		"no-empty": false,
-		"no-empty-interface": false,
-		"ordered-imports": [true, {
-			"import-sources-order": "any",
-			"named-imports-order": "lowercase-first"
+		"max-line-length": false,
+		"member-ordering": [true, {
+			"order": [
+				"public-static-field",
+				"protected-static-field",
+				"private-static-field",
+				"public-instance-field",
+				"protected-instance-field",
+				"private-instance-field",
+				"public-static-accessor",
+				"protected-static-accessor",
+				"private-static-accessor",
+				"public-instance-accessor",
+				"protected-instance-accessor",
+				"private-instance-accessor",
+				"public-constructor",
+				"protected-constructor",
+				"private-constructor",
+				"public-instance-method",
+				"protected-instance-method",
+				"private-instance-method",
+				"public-static-method",
+				"private-static-method",
+				"protected-static-method"
+			]
 		}],
+		"no-empty": false,
+		"ordered-imports": [
+			true, {
+				"import-sources-order": "any",
+				"named-imports-order": "lowercase-first"
+			}],
 		"object-literal-sort-keys": false,
-		"no-consecutive-blank-lines": [false],
+		"no-consecutive-blank-lines": false,
 		"trailing-comma": false
-	},
-	"rulesDirectory": []
+	}
 }

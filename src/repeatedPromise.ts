@@ -3,11 +3,6 @@ export default class RepeatedPromise<T> {
 	private _promise!: Promise<T> // tslint:disable-line:variable-name
 	private resolve!: (value: T) => void
 
-	constructor(initialValue: T) {
-		this._value = initialValue
-		this.initializePromise()
-	}
-
 	public get value(): T {
 		return this._value
 	}
@@ -20,6 +15,11 @@ export default class RepeatedPromise<T> {
 
 	public get promise(): Promise<T> {
 		return this._promise
+	}
+
+	constructor(initialValue: T) {
+		this._value = initialValue
+		this.initializePromise()
 	}
 
 	private initializePromise(): void {

@@ -17,7 +17,7 @@
 	"scripts": {
 		"build": "tsc",
 		"prepublishOnly": "tsc",
-		"lint": "tslint -p tsconfig.json"
+		"lint": "tslint -p tsconfig.json --fix"
 	},
 	"author": {
 		"name": "Jacob Poul Richardt",
@@ -29,7 +29,7 @@
 		"url": "git@github.com:CHAOS-ApS/portalclient.git"
 	},
 	"devDependencies": {
-		"typescript": "3.8.3",
-		"tslint": "5.20.1"
+		"typescript": "4.3.5",
+		"tslint": "6.1.3"
 	}
 }

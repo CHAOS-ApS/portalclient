@@ -17,22 +17,6 @@ export default class PortalClient {
 	// tslint:disable-next-line
 	private _authenticationType: NullableRepeatedPromise<string>
 
-	constructor(
-		servicePath: string,
-		defaultProtocolVersion: string,
-		errorHandler: ErrorHandler | null = null,
-		sessionIdParameterName: string = PortalClient.defaultSessionParameterName,
-		sessionIdMatchedCallMethod = false) {
-		this.servicePath = PortalClient.getServicePath(servicePath)
-		this._defaultProtocolVersion = defaultProtocolVersion
-		this.errorHandler = errorHandler
-		this.sessionIdParameterName = sessionIdParameterName
-		this.sessionIdMatchedCallMethod = sessionIdMatchedCallMethod
-		this._session = new NullableRepeatedPromise()
-		this._authenticationType = new NullableRepeatedPromise()
-		this.call = new ExtensionHandler(this)
-	}
-
 	public get hasSession(): boolean {
 		return this.session !== null
 	}
@@ -63,6 +47,22 @@ export default class PortalClient {
 
 	public get whenIsAuthenticatedChange(): Promise<boolean> {
 		return this._authenticationType.promise.then(type => type !== null)
+	}
+
+	constructor(
+		servicePath: string,
+		defaultProtocolVersion: string,
+		errorHandler: ErrorHandler | null = null,
+		sessionIdParameterName: string = PortalClient.defaultSessionParameterName,
+		sessionIdMatchedCallMethod = false) {
+		this.servicePath = PortalClient.getServicePath(servicePath)
+		this._defaultProtocolVersion = defaultProtocolVersion
+		this.errorHandler = errorHandler
+		this.sessionIdParameterName = sessionIdParameterName
+		this.sessionIdMatchedCallMethod = sessionIdMatchedCallMethod
+		this._session = new NullableRepeatedPromise()
+		this._authenticationType = new NullableRepeatedPromise()
+		this.call = new ExtensionHandler(this)
 	}
 
 	public updateSession(session: ISession | null): void {

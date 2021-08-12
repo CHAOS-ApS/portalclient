@@ -6,6 +6,7 @@ import {ServiceCall} from "../serviceCall"
 
 export type IExtensionConstructor<T extends IExtension> = new (client: PortalClient) => T
 
+// tslint:disable-next-line:no-empty-interface
 export interface IExtension {
 
 }

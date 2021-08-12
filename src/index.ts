@@ -8,6 +8,6 @@ export {default as ErrorCode} from "./errorCode"
 export {default as ServiceError} from "./serviceError"
 
 export type {IExtension, IExtensionConstructor} from "./extensions/extension"
-export type {ErrorHandler, ISession, IBooleanResult, IEmptyResult, IServiceCall, IServiceError, IServiceParameters } from "./data"
+export type {ErrorHandler, ISession, IBooleanResult, IServiceCall, IServiceError, IServiceParameters } from "./data"
 
 export default PortalClient

@@ -38,6 +38,4 @@ export interface IBooleanResult {
 	WasSuccess: boolean
 }
 
-export interface IEmptyResult {}
-
 export type ErrorHandler = (error: IServiceError) => Promise<boolean>
