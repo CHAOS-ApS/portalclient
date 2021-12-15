@@ -1,6 +1,7 @@
 import PortalClient, {HttpMethod, IServiceCall, IServiceError, IServiceParameters, ServiceError, SessionRequirement} from "./index"
 
 export class ServiceCall<T> implements IServiceCall<T> {
+	public static readonly searchParameterPrefix = "_"
 	public readonly response: Promise<T>
 	// tslint:disable-next-line:variable-name
 	private _error: IServiceError | null = null
@@ -40,16 +41,16 @@ export class ServiceCall<T> implements IServiceCall<T> {
 
 	private createFetch(path: string, parameters: IServiceParameters | null, method: HttpMethod, sessionRequirement: SessionRequirement, protocolVersion?: string): Promise<Response> {
 		const url = new URL(this.getUrlToExtension(path, protocolVersion))
+		const hasBody = ServiceCall.hasBody(method)
+		const sessionInBody = this.client.sessionIdMatchesCallMethod && hasBody
+		parameters = parameters ?? {}
 
-		parameters = parameters !== null
-			? ServiceCall.encodeParameters(parameters, !ServiceCall.isJson(method))
-			: {}
+		const searchParameters = ServiceCall.encodeParameters(ServiceCall.extractSearchParameters(parameters, !hasBody), false)
+		const bodyParameters = ServiceCall.encodeParameters(parameters, true)
 
-		if (this.client.sessionIdMatchedCallMethod && ServiceCall.hasBody(method))
-			parameters = this.handleSessionParameter(path, parameters, sessionRequirement)
-		else
-			url.search = new URLSearchParams(this.handleSessionParameter(path, ServiceCall.hasBody(method) ? {} : parameters, sessionRequirement)).toString()
+		this.handleSessionParameter(path, sessionInBody ? bodyParameters : searchParameters, sessionRequirement)
 
+		url.search = new URLSearchParams(searchParameters).toString()
 		const request = ServiceCall.createRequest(method)
 
 		switch (method) {
@@ -58,11 +59,11 @@ export class ServiceCall<T> implements IServiceCall<T> {
 				break
 			case HttpMethod.Post:
 			case HttpMethod.Put:
-				request.body = ServiceCall.createFormDataBody(parameters)
+				request.body = ServiceCall.createFormDataBody(bodyParameters)
 				break
 			case HttpMethod.PostJson:
 			case HttpMethod.PutJson:
-				request.body = JSON.stringify(parameters)
+				request.body = JSON.stringify(bodyParameters)
 				request.headers = {"Content-Type": "application/json"}
 				break
 			default:
@@ -161,10 +162,31 @@ export class ServiceCall<T> implements IServiceCall<T> {
 				continue
 			}
 
-			parameters[key] = this.encodeParameter(parameters[key], encodeObject)
+			parameters[key] = this.encodeParameter(value, encodeObject)
 		}
 
 		return parameters
+	}
+
+	private static extractSearchParameters(parameters: IServiceParameters, inPlace: boolean): IServiceParameters {
+		const result: IServiceParameters = inPlace ? parameters : {}
+
+		for (const key in parameters) { // tslint:disable-line:forin
+			if (key[0] !== this.searchParameterPrefix)
+				continue
+
+			const value = parameters[key]
+
+			if (value === undefined)
+				continue
+
+			delete parameters[key]
+			const cleanKey = key.substring(1)
+
+			result[cleanKey] = value
+		}
+
+		return result
 	}
 
 	private static createRequest(method: HttpMethod): RequestInit {
