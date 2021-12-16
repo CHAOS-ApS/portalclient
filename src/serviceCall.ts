@@ -46,7 +46,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 		parameters = parameters ?? {}
 
 		const searchParameters = ServiceCall.encodeParameters(ServiceCall.extractSearchParameters(parameters, !hasBody), false)
-		const bodyParameters = ServiceCall.encodeParameters(parameters, true)
+		const bodyParameters = ServiceCall.encodeParameters(parameters, ServiceCall.isJson(method))
 
 		this.handleSessionParameter(path, sessionInBody ? bodyParameters : searchParameters, sessionRequirement)
 
