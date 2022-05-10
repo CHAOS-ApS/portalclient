@@ -1,4 +1,5 @@
 import PortalClient, {HttpMethod, IServiceCall, IServiceError, IServiceParameters, ServiceError, SessionRequirement} from "./index"
+import errorCode from "./errorCode"
 
 export class ServiceCall<T> implements IServiceCall<T> {
 	public static readonly searchParameterPrefix = "_"
@@ -110,7 +111,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 
 	private handleError(response: Response, createError: (reason: string) => IServiceError): Promise<T> {
 		return response.json().then(error => {
-			this._error = error as IServiceError
+			this._error = ServiceCall.normalizeServiceError(error)
 			throw new ServiceError(this._error)
 		}, reason => {
 			this._error = createError(reason)
@@ -248,7 +249,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 
 	private static createServiceErrorFromString(message: string): IServiceError {
 		return {
-			Code: "",
+			Code: errorCode.externalError,
 			Message: message
 		}
 	}
@@ -259,5 +260,25 @@ export class ServiceCall<T> implements IServiceCall<T> {
 
 	private static createServiceErrorFromResponse(response: Response): IServiceError {
 		return ServiceCall.createServiceErrorFromString(`Service returned ${response.status}: ${response.statusText}`)
+	}
+
+	private static normalizeServiceError(error: IServiceError | any): IServiceError {
+		if ("Message" in error && "Code" in error)
+			return error
+
+		const message =
+			typeof error === "string"
+			? error
+			: "Message" in error
+				? error.Message
+				: "message" in error
+					? error.message
+					: "title" in error
+						? "errors" in error
+							? error.title + ": " + JSON.stringify(error.errors)
+							: error.title
+						: "Unparsable error"
+
+		return {Message: message, Code: errorCode.externalError}
 	}
 }

@@ -22,7 +22,7 @@
 		"url": "git@github.com:CHAOS-ApS/portalclient.git"
 	},
 	"devDependencies": {
-		"typescript": "4.4.2",
+		"typescript": "4.6.4",
 		"tslint": "6.1.3"
 	}
 }
