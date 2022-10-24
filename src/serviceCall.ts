@@ -64,6 +64,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 				break
 			case HttpMethod.PostJson:
 			case HttpMethod.PutJson:
+			case HttpMethod.PatchJson:
 				request.body = JSON.stringify(bodyParameters)
 				request.headers = {"Content-Type": "application/json"}
 				break
@@ -209,6 +210,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 			case HttpMethod.PostJson:
 			case HttpMethod.Put:
 			case HttpMethod.PutJson:
+			case HttpMethod.PatchJson:
 				return true
 		}
 	}
@@ -222,6 +224,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 				return false
 			case HttpMethod.PostJson:
 			case HttpMethod.PutJson:
+			case HttpMethod.PatchJson:
 				return true
 		}
 	}
@@ -238,6 +241,8 @@ export class ServiceCall<T> implements IServiceCall<T> {
 			case HttpMethod.Put:
 			case HttpMethod.PutJson:
 				return "PUT"
+			case HttpMethod.PatchJson:
+				return "PATCH"
 		}
 	}
 

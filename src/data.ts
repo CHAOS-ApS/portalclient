@@ -10,6 +10,7 @@ export enum HttpMethod {
 	PostJson,
 	Put,
 	PutJson,
+	PatchJson,
 	Delete
 }
 
