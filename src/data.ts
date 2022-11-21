@@ -24,8 +24,9 @@ export interface IServiceParameters {
 }
 
 export interface IServiceError {
-	Code: string
-	Message: string
+	readonly Code: string
+	readonly StatusCode?: number
+	readonly Message: string
 }
 
 export interface ISession {

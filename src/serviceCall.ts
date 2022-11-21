@@ -3,30 +3,50 @@ import errorCode from "./errorCode"
 
 export class ServiceCall<T> implements IServiceCall<T> {
 	public static readonly searchParameterPrefix = "_"
+	private static readonly maxAttempts = 5
+	private static readonly initialRetryDelay = 2000
+	private static readonly retryDelayIncrease = 2
+
 	public readonly response: Promise<T>
 	// tslint:disable-next-line:variable-name
 	private _error: IServiceError | null = null
+	// tslint:disable-next-line:variable-name
+	private _attempts = 0
 
 	private readonly client: PortalClient
 
 	public get error(): IServiceError | null {
 		return this._error
 	}
+	public get attempts(): number {
+		return this._attempts
+	}
 
 	constructor(client: PortalClient, path: string, parameters: IServiceParameters | null = null, method: HttpMethod, sessionRequirement: SessionRequirement, protocolVersion?: string) {
 		this.client = client
 
-		const createFetchAndHandle = () => this.createFetch(path, parameters, method, sessionRequirement, protocolVersion)
-			.then(
-				r => this.createResponse(r),
-				reason => {
-					this._error = ServiceCall.createServiceError(reason)
-					throw reason
-				})
+		const createFetchAndHandle = () => {
+			this._attempts++
+			this._error = null
+			return this.createFetch(path, parameters, method, sessionRequirement, protocolVersion)
+				.then(
+					r => this.createResponse(r),
+					reason => {
+						this._error = ServiceCall.createServiceError(reason)
+						throw reason
+					})
+		}
 
 		this.response = createFetchAndHandle()
 			.catch(reason => {
-				if (this._error === null || this.client.errorHandler === null)
+				if (this._error === null)
+					throw reason
+
+				if (this.shouldRetry(method, this._error))
+					return this.delayRetry()
+						.then(() => createFetchAndHandle())
+
+				if (this.client.errorHandler === null)
 					throw reason
 
 				return this.client.errorHandler(this._error)
@@ -100,23 +120,36 @@ export class ServiceCall<T> implements IServiceCall<T> {
 		}
 
 		if (response.status >= 400 && response.status < 500)
-			return this.handleError(response, reason => ServiceCall.createServiceErrorFromString(`Failed to parse error object from ${response.status} "${response.statusText}" response: ${reason}`))
+			return this.handleError(response, (reason, statusCode) => ServiceCall.createServiceErrorFromString(`Failed to parse error object from ${response.status} "${response.statusText}" response: ${reason}`, statusCode))
 
 		if (response.status >= 500 && response.status < 600)
-			return this.handleError(response, () => ServiceCall.createServiceErrorFromResponse(response))
+			return this.handleError(response, (reason, statusCode) => ServiceCall.createServiceErrorFromResponse(response, statusCode))
 
-		this._error = ServiceCall.createServiceErrorFromResponse(response)
+		this._error = ServiceCall.createServiceErrorFromResponse(response, response.status)
 
 		return Promise.reject(new ServiceError(this._error))
 	}
 
-	private handleError(response: Response, createError: (reason: string) => IServiceError): Promise<T> {
+	private handleError(response: Response, createError: (reason: string, statusCode: number) => IServiceError): Promise<T> {
 		return response.json().then(error => {
-			this._error = ServiceCall.normalizeServiceError(error)
+			this._error = ServiceCall.normalizeServiceError(error, response.status)
 			throw new ServiceError(this._error)
 		}, reason => {
-			this._error = createError(reason)
+			this._error = createError(reason, response.status)
 			throw new ServiceError(this._error)
+		})
+	}
+
+	private shouldRetry(method: HttpMethod, error: IServiceError): boolean {
+		if (this.attempts === ServiceCall.maxAttempts || error.StatusCode === undefined || error.StatusCode < 500 || error.StatusCode > 599)
+			return false
+
+		return method === HttpMethod.Get || error.StatusCode === 502 || error.StatusCode === 503 || error.StatusCode === 504
+	}
+
+	private delayRetry(): Promise<void> {
+		return new Promise(resolve => {
+			setTimeout(resolve, this.attempts * ServiceCall.retryDelayIncrease * ServiceCall.initialRetryDelay)
 		})
 	}
 
@@ -252,24 +285,25 @@ export class ServiceCall<T> implements IServiceCall<T> {
 		return body
 	}
 
-	private static createServiceErrorFromString(message: string): IServiceError {
+	private static createServiceErrorFromString(message: string, statusCode?: number): IServiceError {
 		return {
 			Code: errorCode.externalError,
-			Message: message
+			Message: message,
+			StatusCode: statusCode
 		}
 	}
 
-	private static createServiceError(error: Error): IServiceError {
-		return this.createServiceErrorFromString(error.message)
+	private static createServiceError(error: Error, statusCode?: number): IServiceError {
+		return this.createServiceErrorFromString(error.message, statusCode)
 	}
 
-	private static createServiceErrorFromResponse(response: Response): IServiceError {
-		return ServiceCall.createServiceErrorFromString(`Service returned ${response.status}: ${response.statusText}`)
+	private static createServiceErrorFromResponse(response: Response, statusCode: number): IServiceError {
+		return ServiceCall.createServiceErrorFromString(`Service returned ${response.status}: ${response.statusText}`, statusCode)
 	}
 
-	private static normalizeServiceError(error: IServiceError | any): IServiceError {
+	private static normalizeServiceError(error: IServiceError | any, status: number): IServiceError {
 		if ("Message" in error && "Code" in error)
-			return error
+			return {Message: error.Message, Code: error.Code, StatusCode: status}
 
 		const message =
 			typeof error === "string"
@@ -284,6 +318,6 @@ export class ServiceCall<T> implements IServiceCall<T> {
 							: error.title
 						: "Unparsable error"
 
-		return {Message: message, Code: errorCode.externalError}
+		return {Message: message, Code: errorCode.externalError, StatusCode: status}
 	}
 }
