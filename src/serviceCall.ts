@@ -12,6 +12,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 	private _error: IServiceError | null = null
 	// tslint:disable-next-line:variable-name
 	private _attempts = 0
+	private hasUsedErrorHandler = false
 
 	private readonly client: PortalClient
 
@@ -25,39 +26,48 @@ export class ServiceCall<T> implements IServiceCall<T> {
 	constructor(client: PortalClient, path: string, parameters: IServiceParameters | null = null, method: HttpMethod, sessionRequirement: SessionRequirement, protocolVersion?: string) {
 		this.client = client
 
-		const createFetchAndHandle = () => {
+		this.response = this.callAndHandle(method, () => this.createFetch(path, parameters, method, sessionRequirement, protocolVersion)
+			.then(
+				r => this.createResponse(r),
+				reason => {
+					this._error = ServiceCall.createServiceError(reason)
+					throw reason
+				}))
+	}
+
+	private async callAndHandle(method: HttpMethod, call: () => Promise<T>): Promise<T> {
+		try {
 			this._attempts++
-			this._error = null
-			return this.createFetch(path, parameters, method, sessionRequirement, protocolVersion)
-				.then(
-					r => this.createResponse(r),
-					reason => {
-						this._error = ServiceCall.createServiceError(reason)
-						throw reason
-					})
+			return await call()
+		} catch (reason) {
+			if (this._error === null)
+				throw reason
+
+			if (this.shouldRetry(method, this._error)) {
+				await this.delayRetry()
+				this._error = null
+				return this.callAndHandle(method, call)
+			}
+
+			if (this.client.errorHandler === null || this.hasUsedErrorHandler)
+				throw reason
+
+			this.hasUsedErrorHandler = true
+			let wasHandled = false
+
+			try {
+				wasHandled = await this.client.errorHandler(this._error)
+			} catch (innerReason) {
+				throw new Error("Error handler failed itself: " + (innerReason as any)?.message)
+			}
+
+			if (wasHandled) {
+				this._error = null
+				return this.callAndHandle(method, call)
+			}
+
+			throw reason // Error wasn't handled
 		}
-
-		this.response = createFetchAndHandle()
-			.catch(reason => {
-				if (this._error === null)
-					throw reason
-
-				if (this.shouldRetry(method, this._error))
-					return this.delayRetry()
-						.then(() => createFetchAndHandle())
-
-				if (this.client.errorHandler === null)
-					throw reason
-
-				return this.client.errorHandler(this._error)
-					.then(wasHandled => {
-						if (!wasHandled)
-							throw reason
-						return createFetchAndHandle()
-					}, innerReason => {
-						throw new Error("Error handler failed itself: " + innerReason.message)
-					})
-			})
 	}
 
 	private createFetch(path: string, parameters: IServiceParameters | null, method: HttpMethod, sessionRequirement: SessionRequirement, protocolVersion?: string): Promise<Response> {
