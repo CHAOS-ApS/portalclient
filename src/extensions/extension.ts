@@ -43,7 +43,7 @@ export default abstract class Extension implements IExtension {
 		this.client.updateSession(session)
 	}
 
-	public static add<T>(extensionConstructor: IExtensionConstructor<T>, extensionName: string): void {
+	public static add<T extends IExtension>(extensionConstructor: IExtensionConstructor<T>, extensionName: string): void {
 		ExtensionHandler.add(extensionConstructor, extensionName)
 	}
 

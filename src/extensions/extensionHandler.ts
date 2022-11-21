@@ -14,7 +14,7 @@ export default class ExtensionHandler {
 		return this.extensionMap[extensionName] as T
 	}
 
-	public static add<T>(extensionConstructor: IExtensionConstructor<T>, extensionName: string): void {
+	public static add<T extends IExtension>(extensionConstructor: IExtensionConstructor<T>, extensionName: string): void {
 		Object.defineProperty(ExtensionHandler.prototype, extensionName, {
 			get(this: ExtensionHandler) {
 				return this.getExtension(extensionConstructor, extensionName)
