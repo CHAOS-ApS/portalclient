@@ -317,16 +317,18 @@ export class ServiceCall<T> implements IServiceCall<T> {
 
 		const message =
 			typeof error === "string"
-			? error
-			: "Message" in error
-				? error.Message
-				: "message" in error
-					? error.message
-					: "title" in error
-						? "errors" in error
-							? error.title + ": " + JSON.stringify(error.errors)
-							: error.title
-						: "Unparsable error"
+				? error
+				: "Message" in error
+					? error.Message
+					: "message" in error
+						? error.message
+						: "title" in error
+							? "errors" in error
+								? error.title + ": " + JSON.stringify(error.errors)
+								: error.title
+							: "Error" in error && ("Message" in error.Error || "Code" in error.Error)
+								? [error.Error.Code, error.Error.Message].filter(s => s).join(": ")
+								: "Unparsable error"
 
 		return {Message: message, Code: errorCode.externalError, StatusCode: status}
 	}
