@@ -240,7 +240,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 			mode: "cors",
 			cache: "no-cache",
 			credentials: "omit",
-			redirect: "follow",
+			redirect: "follow"
 		}
 	}
 
