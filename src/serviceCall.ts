@@ -52,14 +52,14 @@ export class ServiceCall<T> implements IServiceCall<T> {
 			this._attempts++
 			return await call()
 		} catch (reason: any) {
-			if (this._error === null)
-				throw reason
-
 			if (this.wasAborted) {
 				if (reason.name === "AbortError")
 					throw reason
 				throw new AbortError(reason)
 			}
+
+			if (this._error === null)
+				throw reason
 
 			if (this.shouldRetry(method, this._error)) {
 				await this.delayRetry()
