@@ -1,5 +1,6 @@
 import PortalClient, {HttpMethod, IServiceCall, IServiceError, IServiceParameters, ServiceError, SessionRequirement} from "./index"
 import errorCode from "./errorCode"
+import AbortError from "./abortError"
 
 export class ServiceCall<T> implements IServiceCall<T> {
 	public static readonly searchParameterPrefix = "_"
@@ -13,6 +14,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 	// tslint:disable-next-line:variable-name
 	private _attempts = 0
 	private hasUsedErrorHandler = false
+	private abortController?: AbortController
 
 	private readonly client: PortalClient
 
@@ -22,9 +24,14 @@ export class ServiceCall<T> implements IServiceCall<T> {
 	public get attempts(): number {
 		return this._attempts
 	}
+	public get wasAborted(): boolean {
+		return this.abortController?.signal.aborted ?? false
+	}
 
 	constructor(client: PortalClient, path: string, parameters: IServiceParameters | null = null, method: HttpMethod, sessionRequirement: SessionRequirement, protocolVersion?: string) {
 		this.client = client
+		if (AbortController)
+			this.abortController = new AbortController()
 
 		this.response = this.callAndHandle(method, () => this.createFetch(path, parameters, method, sessionRequirement, protocolVersion)
 			.then(
@@ -35,13 +42,24 @@ export class ServiceCall<T> implements IServiceCall<T> {
 				}))
 	}
 
+	public abort(reason?: Error): void {
+		if (this.abortController)
+			this.abortController.abort(reason)
+	}
+
 	private async callAndHandle(method: HttpMethod, call: () => Promise<T>): Promise<T> {
 		try {
 			this._attempts++
 			return await call()
-		} catch (reason) {
+		} catch (reason: any) {
 			if (this._error === null)
 				throw reason
+
+			if (this.wasAborted) {
+				if (reason.name === "AbortError")
+					throw reason
+				throw new AbortError(reason)
+			}
 
 			if (this.shouldRetry(method, this._error)) {
 				await this.delayRetry()
@@ -83,6 +101,9 @@ export class ServiceCall<T> implements IServiceCall<T> {
 
 		url.search = new URLSearchParams(searchParameters).toString()
 		const request = ServiceCall.createRequest(method)
+
+		if (this.abortController)
+			request.signal = this.abortController.signal
 
 		switch (method) {
 			case HttpMethod.Get:
