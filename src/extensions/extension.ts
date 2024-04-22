@@ -17,9 +17,9 @@ export default abstract class Extension implements IExtension {
 	constructor(protected client: PortalClient) {}
 
 	// tslint:disable-next-line:max-line-length
-	protected call<T>(methodName: string | null, parameters: IServiceParameters | null = null, method: HttpMethod = HttpMethod.Get, sessionRequirement: SessionRequirement = SessionRequirement.basic): ServiceCall<T> {
+	protected call<T>(methodName: string | null, parameters: IServiceParameters | null = null, method: HttpMethod = HttpMethod.Get, sessionRequirement: SessionRequirement = SessionRequirement.basic, headers?: Record<string, string>): ServiceCall<T> {
 		const path = methodName !== null ? `${this.extensionName}/${methodName}` : this.extensionName
-		return new ServiceCall<T>(this.client, path, parameters, method, sessionRequirement)
+		return new ServiceCall<T>(this.client, path, parameters, method, sessionRequirement, headers)
 	}
 
 	protected onSuccess<T>(call: ServiceCall<T>, onSuccess: (value: T) => void): ServiceCall<T> {

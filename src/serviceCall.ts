@@ -28,12 +28,12 @@ export class ServiceCall<T> implements IServiceCall<T> {
 		return this.abortController?.signal.aborted ?? false
 	}
 
-	constructor(client: PortalClient, path: string, parameters: IServiceParameters | null = null, method: HttpMethod, sessionRequirement: SessionRequirement, protocolVersion?: string) {
+	constructor(client: PortalClient, path: string, parameters: IServiceParameters | null = null, method: HttpMethod, sessionRequirement: SessionRequirement, headers?: Record<string, string>, protocolVersion?: string) {
 		this.client = client
 		if (AbortController)
 			this.abortController = new AbortController()
 
-		this.response = this.callAndHandle(method, () => this.createFetch(path, parameters, method, sessionRequirement, protocolVersion)
+		this.response = this.callAndHandle(method, () => this.createFetch(path, parameters, method, sessionRequirement, headers, protocolVersion)
 			.then(
 				r => this.createResponse(r),
 				reason => {
@@ -88,7 +88,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 		}
 	}
 
-	private createFetch(path: string, parameters: IServiceParameters | null, method: HttpMethod, sessionRequirement: SessionRequirement, protocolVersion?: string): Promise<Response> {
+	private createFetch(path: string, parameters: IServiceParameters | null, method: HttpMethod, sessionRequirement: SessionRequirement, headers?: Record<string, string>, protocolVersion?: string): Promise<Response> {
 		const url = new URL(this.getUrlToExtension(path, protocolVersion))
 		const hasBody = ServiceCall.hasBody(method)
 		const sessionInBody = this.client.sessionIdMatchesCallMethod && hasBody
@@ -101,6 +101,9 @@ export class ServiceCall<T> implements IServiceCall<T> {
 
 		url.search = new URLSearchParams(searchParameters).toString()
 		const request = ServiceCall.createRequest(method)
+
+		if (headers)
+			request.headers = headers
 
 		if (this.abortController)
 			request.signal = this.abortController.signal
@@ -117,7 +120,10 @@ export class ServiceCall<T> implements IServiceCall<T> {
 			case HttpMethod.PutJson:
 			case HttpMethod.PatchJson:
 				request.body = JSON.stringify(bodyParameters)
-				request.headers = {"Content-Type": "application/json"}
+				if (request.headers)
+					(request.headers as Record<string, string>)["Content-Type"] = "application/json"
+				else
+					request.headers = {"Content-Type": "application/json"}
 				break
 			default:
 				throw new Error("Unknown http method: " + method)
