@@ -16,10 +16,11 @@ export default abstract class Extension implements IExtension {
 
 	constructor(protected client: PortalClient) {}
 
-	// tslint:disable-next-line:max-line-length
-	protected call<T>(methodName: string | null, parameters: IServiceParameters | null = null, method: HttpMethod = HttpMethod.Get, sessionRequirement: SessionRequirement = SessionRequirement.basic, headers?: Record<string, string>): ServiceCall<T> {
+	protected call<T>(methodName: string | null, parameters: IServiceParameters | null, method: HttpMethod, sessionRequirement: SessionRequirement, headers: Record<string, string> | undefined, returnBlob: false): ServiceCall<T>
+	protected call(methodName: string | null, parameters: IServiceParameters | null, method: HttpMethod, sessionRequirement: SessionRequirement, headers: Record<string, string> | undefined, returnBlob: true): ServiceCall<Blob>
+	protected call<T>(methodName: string | null, parameters: IServiceParameters | null = null, method: HttpMethod = HttpMethod.Get, sessionRequirement: SessionRequirement = SessionRequirement.basic, headers?: Record<string, string>, returnBlob: boolean = false): ServiceCall<T> {
 		const path = methodName !== null ? `${this.extensionName}/${methodName}` : this.extensionName
-		return new ServiceCall<T>(this.client, path, parameters, method, sessionRequirement, headers)
+		return new ServiceCall<T>(this.client, path, parameters, method, sessionRequirement, headers, returnBlob)
 	}
 
 	protected onSuccess<T>(call: ServiceCall<T>, onSuccess: (value: T) => void): ServiceCall<T> {
