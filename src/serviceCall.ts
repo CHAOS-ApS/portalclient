@@ -28,14 +28,14 @@ export class ServiceCall<T> implements IServiceCall<T> {
 		return this.abortController?.signal.aborted ?? false
 	}
 
-	constructor(client: PortalClient, path: string, parameters: IServiceParameters | null = null, method: HttpMethod, sessionRequirement: SessionRequirement, headers?: Record<string, string>, protocolVersion?: string) {
+	constructor(client: PortalClient, path: string, parameters: IServiceParameters | null = null, method: HttpMethod, sessionRequirement: SessionRequirement, headers?: Record<string, string>, returnBlob: boolean = false, protocolVersion?: string) {
 		this.client = client
 		if (AbortController)
 			this.abortController = new AbortController()
 
 		this.response = this.callAndHandle(method, () => this.createFetch(path, parameters, method, sessionRequirement, headers, protocolVersion)
 			.then(
-				r => this.createResponse(r),
+				r => this.createResponse(r, returnBlob),
 				reason => {
 					this._error = ServiceCall.createServiceError(reason)
 					throw reason
@@ -149,11 +149,11 @@ export class ServiceCall<T> implements IServiceCall<T> {
 		return this.client.servicePath + "v" + (protocolVersion !== undefined ? protocolVersion : this.client.defaultProtocolVersion) + "/" + path
 	}
 
-	private createResponse(response: Response): Promise<T> {
+	private createResponse(response: Response, returnBlob: boolean): Promise<T> {
 		if (response.ok) {
 			if (response.status === 204)
 				return Promise.resolve() as any as Promise<T>
-			return response.json()
+			return returnBlob ? response.blob() : response.json()
 		}
 
 		if (response.status >= 400 && response.status < 500)
