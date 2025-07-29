@@ -3,7 +3,7 @@
 	"version": "3.14.4",
 	"license": "MIT",
 	"description": "A Typescript / Javascript client for the Portal api",
-	"homepage": "http://chaosinsight.com/",
+	"homepage": "https://chaosinsight.com/",
 	"private": false,
 	"browser": "./src/index.ts",
 	"types": "./dist/index.d.ts",
@@ -14,8 +14,7 @@
 	},
 	"author": {
 		"name": "Jacob Poul Richardt",
-		"email": "jacob@chaosinsight.com",
-		"url": "https://twitter.com/JacobRichardt"
+		"email": "jacob@chaosinsight.com"
 	},
 	"repository": {
 		"type": "git",

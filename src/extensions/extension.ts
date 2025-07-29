@@ -31,6 +31,10 @@ export default abstract class Extension implements IExtension {
 			Id: id,
 			DateCreated: Math.round(new Date().getTime() / 1000),
 			DateModified: Math.round(new Date().getTime() / 1000),
+			Tokens: {
+				Access: null,
+				Refresh: null
+			}
 		})
 	}
 

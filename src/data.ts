@@ -34,6 +34,10 @@ export interface ISession {
 	UserGuid?: string
 	DateCreated: number
 	DateModified: number
+	Tokens: {
+		Access: string | null
+		Refresh: string | null
+	}
 }
 
 export interface IBooleanResult {
