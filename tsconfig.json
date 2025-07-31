@@ -2,16 +2,18 @@
 	"compilerOptions": {
 		"module": "esnext",
 		"target": "esnext",
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"skipLibCheck": true,
 		"sourceMap": true,
 		"strict": true,
 		"declaration": true,
-		"importsNotUsedAsValues": "error",
+		"moduleResolution": "bundler",
 		"baseUrl": "./src/",
 		"outDir": "./dist",
 		"lib": [
-			"es2015",
-			"dom",
-			"scripthost"
+			"esnext",
+			"dom"
 		]
 	},
 	"exclude": [
