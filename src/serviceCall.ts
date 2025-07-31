@@ -1,4 +1,4 @@
-import PortalClient, {HttpMethod, IServiceCall, IServiceError, IServiceParameters, ServiceError, SessionRequirement} from "./index"
+import PortalClient, {HttpMethod, IServiceCall, IServiceError, IServiceParameters, ServiceError} from "./index"
 import errorCode from "./errorCode"
 import AbortError from "./abortError"
 
@@ -14,7 +14,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 	// tslint:disable-next-line:variable-name
 	private _attempts = 0
 	private hasUsedErrorHandler = false
-	private abortController?: AbortController
+	private readonly abortController?: AbortController
 
 	private readonly client: PortalClient
 
@@ -28,12 +28,13 @@ export class ServiceCall<T> implements IServiceCall<T> {
 		return this.abortController?.signal.aborted ?? false
 	}
 
-	constructor(client: PortalClient, path: string, parameters: IServiceParameters | null = null, method: HttpMethod, sessionRequirement: SessionRequirement, headers?: Record<string, string>, returnBlob: boolean = false, protocolVersion?: string) {
+	constructor(client: PortalClient, path: string, parameters: IServiceParameters | null, method: HttpMethod, requiresToken: string | boolean, headers?: Record<string, string>, returnBlob: boolean = false, protocolVersion?: string) {
 		this.client = client
+
 		if (AbortController)
 			this.abortController = new AbortController()
 
-		this.response = this.callAndHandle(method, () => this.createFetch(path, parameters, method, sessionRequirement, headers, protocolVersion)
+		this.response = this.callAndHandle(method, () => this.createFetch(path, parameters, method, requiresToken, headers, protocolVersion)
 			.then(
 				r => this.createResponse(r, returnBlob),
 				reason => {
@@ -88,16 +89,16 @@ export class ServiceCall<T> implements IServiceCall<T> {
 		}
 	}
 
-	private createFetch(path: string, parameters: IServiceParameters | null, method: HttpMethod, sessionRequirement: SessionRequirement, headers?: Record<string, string>, protocolVersion?: string): Promise<Response> {
+	private createFetch(path: string, parameters: IServiceParameters | null, method: HttpMethod, requiresToken: string | boolean, headers?: Record<string, string>, protocolVersion?: string): Promise<Response> {
 		const url = new URL(this.getUrlToExtension(path, protocolVersion))
 		const hasBody = ServiceCall.hasBody(method)
-		const sessionInBody = this.client.sessionIdMatchesCallMethod && hasBody
 		parameters = parameters ?? {}
+
+		if (requiresToken !== false)
+			headers = this.addAuthenticationToken(requiresToken, headers)
 
 		const searchParameters = ServiceCall.encodeParameters(ServiceCall.extractSearchParameters(parameters, !hasBody), false)
 		const bodyParameters = ServiceCall.encodeParameters(parameters, !ServiceCall.isJson(method))
-
-		this.handleSessionParameter(path, sessionInBody ? bodyParameters : searchParameters, sessionRequirement)
 
 		url.search = new URLSearchParams(searchParameters).toString()
 		const request = ServiceCall.createRequest(method)
@@ -132,21 +133,20 @@ export class ServiceCall<T> implements IServiceCall<T> {
 		return fetch(url.toString(), request)
 	}
 
-	private handleSessionParameter(path: string, parameters: IServiceParameters, sessionRequirement: SessionRequirement): IServiceParameters {
-		if (sessionRequirement !== SessionRequirement.none) {
-			if (!this.client.hasSession)
-				throw new Error(`A session is required for "${path}"`)
-			parameters[this.client.sessionIdParameterName] = this.client.session!.Id
-
-			if (sessionRequirement === SessionRequirement.authenticated && !this.client.isAuthenticated)
-				throw new Error(`An authenticated session is required for "${path}"`)
-		}
-
-		return parameters
-	}
-
 	private getUrlToExtension(path: string, protocolVersion?: string): string {
 		return this.client.servicePath + "v" + (protocolVersion !== undefined ? protocolVersion : this.client.defaultProtocolVersion) + "/" + path
+	}
+
+	private addAuthenticationToken(token: string | true, headers?: Record<string, string>): Record<string, string> {
+		if (token === true) {
+			if (!this.client.hasAccessToken)
+				throw new Error("No access token set")
+			token = this.client.accessToken!
+		}
+
+		headers = headers ?? {}
+		headers["Authorization"] = "Bearer " + token
+		return headers
 	}
 
 	private createResponse(response: Response, returnBlob: boolean): Promise<T> {
@@ -211,7 +211,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 					return value.toString()
 				else if (value instanceof Number)
 					return value.valueOf()
-				else if (encodeObject && !(value instanceof Blob)) // Don"t encode Blobs (including Files)
+				else if (encodeObject && !(value instanceof Blob)) // Don't encode Blobs (including Files)
 					return JSON.stringify(value)
 				return value
 			case "symbol":

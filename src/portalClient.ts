@@ -1,94 +1,78 @@
-import {ErrorHandler, ExtensionHandler, ISession} from "./index"
-import NullableRepeatedPromise from "./nullableRepeatedPromise"
+import {ErrorHandler, ExtensionHandler} from "./index"
 
-export default class PortalClient {
-	private static readonly defaultSessionParameterName = "sessionId"
+export default class PortalClient extends EventTarget {
+	public static readonly EVENT_ACCESS_TOKEN_CHANGED = "accessTokenChanged"
+	public static readonly EVENT_AUTHENTICATION_TYPE_CHANGED = "authenticationTypeChanged"
 
 	public readonly servicePath: string
+	public readonly defaultProtocolVersion: string
 	public readonly call: ExtensionHandler
 	public readonly errorHandler: ErrorHandler | null = null
-	public readonly sessionIdParameterName: string
-	public readonly sessionIdMatchesCallMethod: boolean
 
-	// tslint:disable-next-line
-	private _session: NullableRepeatedPromise<ISession>
-	// tslint:disable-next-line
-	private readonly _defaultProtocolVersion: string
-	// tslint:disable-next-line
-	private _authenticationType: NullableRepeatedPromise<string>
+	private _accessToken: string | null = null
+	private _authenticationType: string | null = null
 
-	public get hasSession(): boolean {
-		return this.session !== null
-	}
-
-	public get session(): ISession | null {
-		return this._session.value
-	}
-
-	public get defaultProtocolVersion(): string {
-		return this._defaultProtocolVersion
+	public get accessToken(): string | null {
+		return this._accessToken
 	}
 
 	public get authenticationType(): string | null {
-		return this._authenticationType.value
+		return this._authenticationType
 	}
 
-	public get isAuthenticated(): boolean {
-		return this._authenticationType.value !== null
+	public get hasAccessToken(): boolean {
+		return this._accessToken !== null
 	}
 
-	public get whenHasSession(): Promise<ISession> {
-		return this._session.whenNotNull()
+	public get hasAuthenticationType(): boolean {
+		return this._authenticationType !== null
 	}
 
-	public get whenIsAuthenticated(): Promise<string> {
-		return this._authenticationType.whenNotNull()
-	}
+	public get whenHasAccessToken(): Promise<void> {
+		if (this.hasAccessToken)
+			return Promise.resolve()
 
-	public get whenIsAuthenticatedChange(): Promise<boolean> {
-		return this._authenticationType.promise.then(type => type !== null)
+		return new Promise(resolve => {
+			const listener = (event: Event) => {
+				this.removeEventListener(PortalClient.EVENT_ACCESS_TOKEN_CHANGED, listener)
+				resolve()
+			}
+			this.addEventListener(PortalClient.EVENT_ACCESS_TOKEN_CHANGED, listener)
+		})
 	}
 
 	constructor(
 		servicePath: string,
 		defaultProtocolVersion: string,
-		errorHandler: ErrorHandler | null = null,
-		sessionIdParameterName: string = PortalClient.defaultSessionParameterName,
-		sessionIdMatchesCallMethod = false) {
+		errorHandler: ErrorHandler | null = null) {
+		super()
 		this.servicePath = PortalClient.getServicePath(servicePath)
-		this._defaultProtocolVersion = defaultProtocolVersion
+		this.defaultProtocolVersion = defaultProtocolVersion
 		this.errorHandler = errorHandler
-		this.sessionIdParameterName = sessionIdParameterName
-		this.sessionIdMatchesCallMethod = sessionIdMatchesCallMethod
-		this._session = new NullableRepeatedPromise()
-		this._authenticationType = new NullableRepeatedPromise()
 		this.call = new ExtensionHandler(this)
 	}
 
-	public updateSession(session: ISession | null): void {
-		PortalClient.fixSession(session)
-		this._session.value = session
-
-		if (session === null)
-			this.setAuthenticated(null)
-	}
-
-	public setAuthenticated(type: string | null): void {
-		this._authenticationType.value = type
-	}
-
-	private static fixSession(session: ISession | null): void { // Fix if API is old version
-		if (session === null || session.Id)
+	public setAccessToken(token: string | null, authenticationType: string | null): void {
+		if (token === null && this._accessToken === null)
 			return
 
-		session.Id = (session as any).Guid
+		if (token === null && authenticationType !== null)
+			authenticationType = null
+
+		const authChanged = authenticationType !== this._authenticationType
+		this._accessToken = token
+		this._authenticationType = authenticationType
+
+		this.dispatchEvent(new Event(PortalClient.EVENT_ACCESS_TOKEN_CHANGED))
+		if (authChanged)
+			this.dispatchEvent(new Event(PortalClient.EVENT_AUTHENTICATION_TYPE_CHANGED))
 	}
 
 	private static getServicePath(value: string): string {
 		if (value === null || value === "")
 			throw new Error("Parameter servicePath can't be empty")
 
-		if (value.substr(value.length - 1, 1) !== "/")
+		if (value.slice(value.length - 1, 1) !== "/")
 			value += "/"
 
 		return value
