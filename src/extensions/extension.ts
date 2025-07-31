@@ -1,7 +1,7 @@
 // tslint:disable:max-classes-per-file
 
-import PortalClient, {ExtensionHandler, HttpMethod} from "../index"
 import type {IServiceParameters} from "../index"
+import PortalClient, {BodyEncoding, ExtensionHandler, HttpMethod, ResponseEncoding} from "../index"
 import {ServiceCall} from "../serviceCall"
 
 export type IExtensionConstructor<T extends IExtension> = new (client: PortalClient) => T
@@ -19,9 +19,9 @@ export default abstract class Extension implements IExtension {
 		this.client = client
 	}
 
-	protected call<T>(methodName: string | null, parameters: IServiceParameters | null = null, method: HttpMethod = HttpMethod.Get, requiresToken: string | boolean = false, headers?: Record<string, string>, returnBlob: boolean = false): ServiceCall<T> {
+	protected call<T>(methodName: string | null, parameters: IServiceParameters | null = null, method: HttpMethod = HttpMethod.Get, bodyEncoding: BodyEncoding = BodyEncoding.None, requiresToken: string | boolean = false, headers?: Record<string, string>, responseEncoding: ResponseEncoding = ResponseEncoding.Json, protocolVersion?: string): ServiceCall<T> {
 		const path = methodName !== null ? `${this.extensionName}/${methodName}` : this.extensionName
-		return new ServiceCall<T>(this.client, path, parameters, method, requiresToken, headers, returnBlob)
+		return new ServiceCall<T>(this.client, path, parameters, method, bodyEncoding, requiresToken, headers, responseEncoding, protocolVersion)
 	}
 
 	protected onSuccess<T>(call: ServiceCall<T>, onSuccess: (value: T) => void): ServiceCall<T> {

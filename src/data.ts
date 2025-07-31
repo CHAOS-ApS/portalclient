@@ -1,11 +1,20 @@
 export enum HttpMethod {
-	Get,
-	Post,
-	PostJson,
-	Put,
-	PutJson,
-	PatchJson,
-	Delete
+	Get = "GET",
+	Post = "POST",
+	Put = "PUT",
+	Patch = "PATCH",
+	Delete = "DELETE"
+}
+
+export enum BodyEncoding {
+	None,
+	FormData,
+	Json
+}
+
+export enum ResponseEncoding {
+	Json,
+	Blob
 }
 
 export interface IServiceCall<T> {

@@ -1,4 +1,4 @@
-import PortalClient, {HttpMethod, IServiceCall, IServiceError, IServiceParameters, ServiceError} from "./index"
+import PortalClient, {BodyEncoding, HttpMethod, IServiceCall, IServiceError, IServiceParameters, ResponseEncoding, ServiceError} from "./index"
 import errorCode from "./errorCode"
 import AbortError from "./abortError"
 
@@ -28,15 +28,15 @@ export class ServiceCall<T> implements IServiceCall<T> {
 		return this.abortController?.signal.aborted ?? false
 	}
 
-	constructor(client: PortalClient, path: string, parameters: IServiceParameters | null, method: HttpMethod, requiresToken: string | boolean, headers?: Record<string, string>, returnBlob: boolean = false, protocolVersion?: string) {
+	constructor(client: PortalClient, path: string, parameters: IServiceParameters | null, method: HttpMethod, bodyEncoding: BodyEncoding, requiresToken: string | boolean, headers?: Record<string, string>, responseEncoding: ResponseEncoding = ResponseEncoding.Json, protocolVersion?: string) {
 		this.client = client
 
 		if (AbortController)
 			this.abortController = new AbortController()
 
-		this.response = this.callAndHandle(method, () => this.createFetch(path, parameters, method, requiresToken, headers, protocolVersion)
+		this.response = this.callAndHandle(method, () => this.createFetch(path, parameters, method, bodyEncoding, requiresToken, headers, protocolVersion)
 			.then(
-				r => this.createResponse(r, returnBlob),
+				r => this.createResponse(r, responseEncoding),
 				reason => {
 					this._error = ServiceCall.createServiceError(reason)
 					throw reason
@@ -89,7 +89,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 		}
 	}
 
-	private createFetch(path: string, parameters: IServiceParameters | null, method: HttpMethod, requiresToken: string | boolean, headers?: Record<string, string>, protocolVersion?: string): Promise<Response> {
+	private createFetch(path: string, parameters: IServiceParameters | null, method: HttpMethod, encoding: BodyEncoding, requiresToken: string | boolean, headers?: Record<string, string>, protocolVersion?: string): Promise<Response> {
 		const url = new URL(this.getUrlToExtension(path, protocolVersion))
 		const hasBody = ServiceCall.hasBody(method)
 		parameters = parameters ?? {}
@@ -98,37 +98,27 @@ export class ServiceCall<T> implements IServiceCall<T> {
 			headers = this.addAuthenticationToken(requiresToken, headers)
 
 		const searchParameters = ServiceCall.encodeParameters(ServiceCall.extractSearchParameters(parameters, !hasBody), false)
-		const bodyParameters = ServiceCall.encodeParameters(parameters, !ServiceCall.isJson(method))
+		const bodyParameters = ServiceCall.encodeParameters(parameters, encoding === BodyEncoding.FormData)
 
 		url.search = new URLSearchParams(searchParameters).toString()
 		const request = ServiceCall.createRequest(method)
 
-		if (headers)
-			request.headers = headers
-
 		if (this.abortController)
 			request.signal = this.abortController.signal
 
-		switch (method) {
-			case HttpMethod.Get:
-			case HttpMethod.Delete:
-				break
-			case HttpMethod.Post:
-			case HttpMethod.Put:
+		switch (encoding) {
+			case BodyEncoding.FormData:
 				request.body = ServiceCall.createFormDataBody(bodyParameters)
 				break
-			case HttpMethod.PostJson:
-			case HttpMethod.PutJson:
-			case HttpMethod.PatchJson:
+			case BodyEncoding.Json:
 				request.body = JSON.stringify(bodyParameters)
-				if (request.headers)
-					(request.headers as Record<string, string>)["Content-Type"] = "application/json"
-				else
-					request.headers = {"Content-Type": "application/json"}
+				headers = headers ?? {}
+				headers["Content-Type"] = "application/json"
 				break
-			default:
-				throw new Error("Unknown http method: " + method)
 		}
+
+		if (headers)
+			request.headers = headers
 
 		return fetch(url.toString(), request)
 	}
@@ -149,11 +139,11 @@ export class ServiceCall<T> implements IServiceCall<T> {
 		return headers
 	}
 
-	private createResponse(response: Response, returnBlob: boolean): Promise<T> {
+	private createResponse(response: Response, encoding: ResponseEncoding): Promise<T> {
 		if (response.ok) {
 			if (response.status === 204)
 				return Promise.resolve() as any as Promise<T>
-			return returnBlob ? response.blob() as Promise<T> : response.json()
+			return encoding === ResponseEncoding.Json ? response.json() : response.blob() as Promise<T>
 		}
 
 		if (response.status >= 400 && response.status < 500)
@@ -263,7 +253,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 
 	private static createRequest(method: HttpMethod): RequestInit {
 		return {
-			method: this.getMethodString(method),
+			method: method,
 			mode: "cors",
 			cache: "no-cache",
 			credentials: "omit",
@@ -277,42 +267,9 @@ export class ServiceCall<T> implements IServiceCall<T> {
 			case HttpMethod.Delete:
 				return false
 			case HttpMethod.Post:
-			case HttpMethod.PostJson:
 			case HttpMethod.Put:
-			case HttpMethod.PutJson:
-			case HttpMethod.PatchJson:
+			case HttpMethod.Patch:
 				return true
-		}
-	}
-
-	private static isJson(method: HttpMethod): boolean {
-		switch (method) {
-			case HttpMethod.Get:
-			case HttpMethod.Delete:
-			case HttpMethod.Post:
-			case HttpMethod.Put:
-				return false
-			case HttpMethod.PostJson:
-			case HttpMethod.PutJson:
-			case HttpMethod.PatchJson:
-				return true
-		}
-	}
-
-	private static getMethodString(method: HttpMethod): string {
-		switch (method) {
-			case HttpMethod.Get:
-				return "GET"
-			case HttpMethod.Delete:
-				return "DELETE"
-			case HttpMethod.Post:
-			case HttpMethod.PostJson:
-				return "POST"
-			case HttpMethod.Put:
-			case HttpMethod.PutJson:
-				return "PUT"
-			case HttpMethod.PatchJson:
-				return "PATCH"
 		}
 	}
 
