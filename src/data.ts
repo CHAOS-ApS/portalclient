@@ -6,16 +6,15 @@ export enum HttpMethod {
 	Delete = "DELETE"
 }
 
-export enum BodyEncoding {
+export enum Encoding {
 	None,
 	FormData,
-	Json
-}
-
-export enum ResponseEncoding {
 	Json,
 	Blob
 }
+
+export type BodyEncoding = Encoding.None | Encoding.FormData | Encoding.Json
+export type ResponseEncoding = Encoding.None | Encoding.Blob | Encoding.Json
 
 export interface IServiceCall<T> {
 	readonly response: Promise<T>

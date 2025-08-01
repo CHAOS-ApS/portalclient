@@ -1,6 +1,4 @@
-import PortalClient, {BodyEncoding, HttpMethod, IServiceCall, IServiceError, IServiceParameters, ResponseEncoding, ServiceError} from "./index"
-import errorCode from "./errorCode"
-import AbortError from "./abortError"
+import PortalClient, {AbortError, BodyEncoding, Encoding, ErrorCode, HttpMethod, IServiceCall, IServiceError, IServiceParameters, ResponseEncoding, ServiceError} from "./index"
 
 export class ServiceCall<T> implements IServiceCall<T> {
 	public static readonly searchParameterPrefix = "_"
@@ -28,7 +26,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 		return this.abortController?.signal.aborted ?? false
 	}
 
-	constructor(client: PortalClient, path: string, parameters: IServiceParameters | null, method: HttpMethod, bodyEncoding: BodyEncoding, requiresToken: string | boolean, headers?: Record<string, string>, responseEncoding: ResponseEncoding = ResponseEncoding.Json, protocolVersion?: string) {
+	constructor(client: PortalClient, path: string, parameters: IServiceParameters | null, method: HttpMethod, bodyEncoding: BodyEncoding, requiresToken: string | boolean, headers?: Record<string, string>, responseEncoding: ResponseEncoding = Encoding.Json, protocolVersion?: string) {
 		this.client = client
 
 		if (AbortController)
@@ -98,7 +96,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 			headers = this.addAuthenticationToken(requiresToken, headers)
 
 		const searchParameters = ServiceCall.encodeParameters(ServiceCall.extractSearchParameters(parameters, !hasBody), false)
-		const bodyParameters = ServiceCall.encodeParameters(parameters, encoding === BodyEncoding.FormData)
+		const bodyParameters = ServiceCall.encodeParameters(parameters, encoding === Encoding.FormData)
 
 		url.search = new URLSearchParams(searchParameters).toString()
 		const request = ServiceCall.createRequest(method)
@@ -107,10 +105,10 @@ export class ServiceCall<T> implements IServiceCall<T> {
 			request.signal = this.abortController.signal
 
 		switch (encoding) {
-			case BodyEncoding.FormData:
+			case Encoding.FormData:
 				request.body = ServiceCall.createFormDataBody(bodyParameters)
 				break
-			case BodyEncoding.Json:
+			case Encoding.Json:
 				request.body = JSON.stringify(bodyParameters)
 				headers = headers ?? {}
 				headers["Content-Type"] = "application/json"
@@ -143,7 +141,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 		if (response.ok) {
 			if (response.status === 204)
 				return Promise.resolve() as any as Promise<T>
-			return encoding === ResponseEncoding.Json ? response.json() : response.blob() as Promise<T>
+			return encoding === Encoding.Json ? response.json() : response.blob() as Promise<T>
 		}
 
 		if (response.status >= 400 && response.status < 500)
@@ -281,7 +279,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 
 	private static createServiceErrorFromString(message: string, statusCode?: number): IServiceError {
 		return {
-			Code: errorCode.externalError,
+			Code: ErrorCode.externalError,
 			Message: message,
 			StatusCode: statusCode
 		}
@@ -314,6 +312,6 @@ export class ServiceCall<T> implements IServiceCall<T> {
 								? [error.Error.Code, error.Error.Message].filter(s => s).join(": ")
 								: "Unparsable error"
 
-		return {Message: message, Code: errorCode.externalError, StatusCode: status}
+		return {Message: message, Code: ErrorCode.externalError, StatusCode: status}
 	}
 }

@@ -1,7 +1,6 @@
 // tslint:disable:max-classes-per-file
 
-import type {IServiceParameters} from "../index"
-import PortalClient, {BodyEncoding, ExtensionHandler, HttpMethod, ResponseEncoding} from "../index"
+import PortalClient, {BodyEncoding, Encoding, ExtensionHandler, HttpMethod, IServiceParameters, ResponseEncoding} from "../index"
 import {ServiceCall} from "../serviceCall"
 
 export type IExtensionConstructor<T extends IExtension> = new (client: PortalClient) => T
@@ -19,8 +18,14 @@ export default abstract class Extension implements IExtension {
 		this.client = client
 	}
 
-	protected call<T>(methodName: string | null, parameters: IServiceParameters | null = null, method: HttpMethod = HttpMethod.Get, bodyEncoding: BodyEncoding = BodyEncoding.None, requiresToken: string | boolean = false, headers?: Record<string, string>, responseEncoding: ResponseEncoding = ResponseEncoding.Json, protocolVersion?: string): ServiceCall<T> {
+	protected call<T>(methodName: string | null, parameters: IServiceParameters | null = null, method: HttpMethod = HttpMethod.Get, bodyEncoding?: BodyEncoding, requiresToken: string | boolean = false, headers?: Record<string, string>, responseEncoding?: ResponseEncoding, protocolVersion?: string): ServiceCall<T> {
 		const path = methodName !== null ? `${this.extensionName}/${methodName}` : this.extensionName
+
+		if (bodyEncoding === undefined)
+			bodyEncoding = method === HttpMethod.Get || method === HttpMethod.Delete ? Encoding.None : Encoding.Json
+		if (responseEncoding === undefined)
+			responseEncoding = method === HttpMethod.Get || method === HttpMethod.Delete ? Encoding.None : Encoding.Json
+
 		return new ServiceCall<T>(this.client, path, parameters, method, bodyEncoding, requiresToken, headers, responseEncoding, protocolVersion)
 	}
 
