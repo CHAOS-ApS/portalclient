@@ -26,13 +26,13 @@ export class ServiceCall<T> implements IServiceCall<T> {
 		return this.abortController?.signal.aborted ?? false
 	}
 
-	constructor(client: PortalClient, path: string, parameters: IServiceParameters | null, method: HttpMethod, bodyEncoding: BodyEncoding, requiresToken: string | boolean, headers?: Record<string, string>, responseEncoding: ResponseEncoding = Encoding.Json, protocolVersion?: string) {
+	constructor(client: PortalClient, path: string, parameters: IServiceParameters | null, method: HttpMethod, requiresToken: string | boolean, bodyEncoding: BodyEncoding, responseEncoding: ResponseEncoding = Encoding.Json, headers?: Record<string, string>, protocolVersion?: string) {
 		this.client = client
 
 		if (AbortController)
 			this.abortController = new AbortController()
 
-		this.response = this.callAndHandle(method, () => this.createFetch(path, parameters, method, bodyEncoding, requiresToken, headers, protocolVersion)
+		this.response = this.callAndHandle(method, () => this.createFetch(path, parameters, method, requiresToken, bodyEncoding, headers, protocolVersion)
 			.then(
 				r => this.createResponse(r, responseEncoding),
 				reason => {
@@ -87,7 +87,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 		}
 	}
 
-	private createFetch(path: string, parameters: IServiceParameters | null, method: HttpMethod, encoding: BodyEncoding, requiresToken: string | boolean, headers?: Record<string, string>, protocolVersion?: string): Promise<Response> {
+	private createFetch(path: string, parameters: IServiceParameters | null, method: HttpMethod, requiresToken: string | boolean, encoding: BodyEncoding, headers?: Record<string, string>, protocolVersion?: string): Promise<Response> {
 		const url = new URL(this.getUrlToExtension(path, protocolVersion))
 		const hasBody = ServiceCall.hasBody(method)
 		parameters = parameters ?? {}
