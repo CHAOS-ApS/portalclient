@@ -15,7 +15,7 @@ export default abstract class Extension implements IExtension {
 	protected abstract readonly extensionName: string
 	protected client: PortalClient
 
-	protected constructor(client: PortalClient) {
+	public constructor(client: PortalClient) {
 		this.client = client
 	}
 
