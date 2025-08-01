@@ -22,7 +22,7 @@ export default abstract class Extension implements IExtension {
 		const path = methodName !== null ? `${this.extensionName}/${methodName}` : this.extensionName
 
 		if (bodyEncoding === undefined)
-			bodyEncoding = method === HttpMethod.Get || method === HttpMethod.Delete ? Encoding.None : Encoding.Json
+			bodyEncoding = method === HttpMethod.Get || method === HttpMethod.Delete || parameters === null ? Encoding.None : Encoding.Json
 		if (responseEncoding === undefined)
 			responseEncoding = method === HttpMethod.Delete ? Encoding.None : Encoding.Json
 

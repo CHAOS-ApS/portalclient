@@ -89,32 +89,37 @@ export class ServiceCall<T> implements IServiceCall<T> {
 
 	private createFetch(path: string, parameters: IServiceParameters | null, method: HttpMethod, requiresToken: string | boolean, encoding: BodyEncoding, headers?: Record<string, string>, protocolVersion?: string): Promise<Response> {
 		const url = new URL(this.getUrlToExtension(path, protocolVersion))
-		const hasBody = ServiceCall.hasBody(method)
+		let hasBody = encoding !== Encoding.None
 		parameters = parameters ?? {}
 
 		if (requiresToken !== false)
 			headers = this.addAuthenticationToken(requiresToken, headers)
 
 		const searchParameters = ServiceCall.encodeParameters(ServiceCall.extractSearchParameters(parameters, !hasBody), false)
-		const bodyParameters = ServiceCall.encodeParameters(parameters, encoding === Encoding.FormData)
-
 		url.search = new URLSearchParams(searchParameters).toString()
+
+		if (hasBody && Object.keys(parameters).length === 0)
+			hasBody = false
+
 		const request = ServiceCall.createRequest(method)
+
+		if (hasBody) {
+			const bodyParameters = ServiceCall.encodeParameters(parameters, encoding === Encoding.FormData)
+
+			switch (encoding) {
+				case Encoding.FormData:
+					request.body = ServiceCall.createFormDataBody(bodyParameters)
+					break
+				case Encoding.Json:
+					request.body = JSON.stringify(bodyParameters)
+					headers = headers ?? {}
+					headers["Content-Type"] = "application/json"
+					break
+			}
+		}
 
 		if (this.abortController)
 			request.signal = this.abortController.signal
-
-		switch (encoding) {
-			case Encoding.FormData:
-				request.body = ServiceCall.createFormDataBody(bodyParameters)
-				break
-			case Encoding.Json:
-				request.body = JSON.stringify(bodyParameters)
-				headers = headers ?? {}
-				headers["Content-Type"] = "application/json"
-				break
-		}
-
 		if (headers)
 			request.headers = headers
 
@@ -256,18 +261,6 @@ export class ServiceCall<T> implements IServiceCall<T> {
 			cache: "no-cache",
 			credentials: "omit",
 			redirect: "follow"
-		}
-	}
-
-	private static hasBody(method: HttpMethod): boolean {
-		switch (method) {
-			case HttpMethod.Get:
-			case HttpMethod.Delete:
-				return false
-			case HttpMethod.Post:
-			case HttpMethod.Put:
-			case HttpMethod.Patch:
-				return true
 		}
 	}
 
