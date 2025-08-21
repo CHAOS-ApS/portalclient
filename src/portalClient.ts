@@ -1,9 +1,6 @@
-import {ErrorHandler, ExtensionHandler} from "./index"
+import {AccessTokenChangedEvent, AuthenticationTypeChangedEvent, ErrorHandler, ExtensionHandler} from "./index"
 
 export default class PortalClient extends EventTarget {
-	public static readonly EVENT_ACCESS_TOKEN_CHANGED = "accessTokenChanged"
-	public static readonly EVENT_AUTHENTICATION_TYPE_CHANGED = "authenticationTypeChanged"
-
 	public readonly servicePath: string
 	public readonly defaultProtocolVersion: string
 	public readonly call: ExtensionHandler
@@ -34,10 +31,10 @@ export default class PortalClient extends EventTarget {
 
 		return new Promise(resolve => {
 			const listener = (event: Event) => {
-				this.removeEventListener(PortalClient.EVENT_ACCESS_TOKEN_CHANGED, listener)
+				this.removeEventListener(AccessTokenChangedEvent.eventName, listener)
 				resolve()
 			}
-			this.addEventListener(PortalClient.EVENT_ACCESS_TOKEN_CHANGED, listener)
+			this.addEventListener(AccessTokenChangedEvent.eventName, listener)
 		})
 	}
 
@@ -63,9 +60,10 @@ export default class PortalClient extends EventTarget {
 		this._accessToken = token
 		this._authenticationType = authenticationType
 
-		this.dispatchEvent(new Event(PortalClient.EVENT_ACCESS_TOKEN_CHANGED))
+		this.dispatchEvent(new AccessTokenChangedEvent(token, authenticationType))
+
 		if (authChanged)
-			this.dispatchEvent(new Event(PortalClient.EVENT_AUTHENTICATION_TYPE_CHANGED))
+			this.dispatchEvent(new AuthenticationTypeChangedEvent(authenticationType))
 	}
 
 	private static getServicePath(value: string): string {
