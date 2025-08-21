@@ -1,6 +1,6 @@
 {
 	"name": "@chaosinsight/portalclient",
-	"version": "4.0.0-beta.6",
+	"version": "4.0.0-beta.7",
 	"license": "MIT",
 	"description": "A Typescript / Javascript client for the Portal api",
 	"homepage": "https://chaosinsight.com/",
