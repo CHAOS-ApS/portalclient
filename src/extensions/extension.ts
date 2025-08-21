@@ -1,6 +1,6 @@
 // tslint:disable:max-classes-per-file
 
-import PortalClient, {BodyEncoding, Encoding, ExtensionHandler, HttpMethod, IServiceParameters, ResponseEncoding} from "../index"
+import PortalClient, {BodyEncoding, Encoding, ExtensionHandler, HttpMethod, IServiceCall, IServiceParameters, ResponseEncoding} from "../index"
 import {ServiceCall} from "../serviceCall"
 
 export type IExtensionConstructor<T extends IExtension> = new (client: PortalClient) => T
@@ -18,7 +18,7 @@ export default abstract class Extension implements IExtension {
 		this.client = client
 	}
 
-	protected call<T>(methodName: string | null, parameters: IServiceParameters | null = null, method: HttpMethod = HttpMethod.Get, requiresToken: string | boolean = true, bodyEncoding?: BodyEncoding, responseEncoding?: ResponseEncoding, headers?: Record<string, string>, protocolVersion?: string): ServiceCall<T> {
+	protected call<T>(methodName: string | null, parameters: IServiceParameters | null = null, method: HttpMethod = HttpMethod.Get, requiresToken: string | boolean = true, bodyEncoding?: BodyEncoding, responseEncoding?: ResponseEncoding, headers?: Record<string, string>, protocolVersion?: string): IServiceCall<T> {
 		const path = methodName !== null ? `${this.extensionName}/${methodName}` : this.extensionName
 
 		if (bodyEncoding === undefined)
@@ -29,7 +29,7 @@ export default abstract class Extension implements IExtension {
 		return new ServiceCall<T>(this.client, path, parameters, method, requiresToken, bodyEncoding, responseEncoding, headers, protocolVersion)
 	}
 
-	protected onSuccess<T>(call: ServiceCall<T>, onSuccess: (value: T) => void): ServiceCall<T> {
+	protected onSuccess<T>(call: IServiceCall<T>, onSuccess: (value: T) => void): IServiceCall<T> {
 		call.response.then(onSuccess, () => {}) // Empty catch to prevent unhandled rejections from this branch of the promise
 		return call
 	}

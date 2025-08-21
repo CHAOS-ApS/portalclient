@@ -19,6 +19,9 @@ export type ResponseEncoding = Encoding.None | Encoding.Blob | Encoding.Json
 export interface IServiceCall<T> {
 	readonly response: Promise<T>
 	readonly error: IServiceError | null
+	readonly attempts: number
+	readonly wasAborted: boolean
+	abort(reason?: Error): void
 }
 
 export interface IServiceParameters {
