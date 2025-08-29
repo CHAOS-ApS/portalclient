@@ -7,10 +7,9 @@ export class ServiceCall<T> implements IServiceCall<T> {
 	private static readonly retryDelayIncrease = 2
 
 	public readonly response: Promise<T>
-	// tslint:disable-next-line:variable-name
 	private _error: IServiceError | null = null
-	// tslint:disable-next-line:variable-name
 	private _attempts = 0
+	private _token: string | null = null
 	private hasUsedErrorHandler = false
 	private readonly abortController?: AbortController
 
@@ -21,6 +20,9 @@ export class ServiceCall<T> implements IServiceCall<T> {
 	}
 	public get attempts(): number {
 		return this._attempts
+	}
+	public get token(): string | null {
+		return this._token
 	}
 	public get wasAborted(): boolean {
 		return this.abortController?.signal.aborted ?? false
@@ -73,7 +75,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 			let wasHandled = false
 
 			try {
-				wasHandled = await this.client.errorHandler(this._error)
+				wasHandled = await this.client.errorHandler(this._error, this.token)
 			} catch (innerReason) {
 				throw new Error("Error handler failed itself: " + (innerReason as any)?.message)
 			}
@@ -137,6 +139,7 @@ export class ServiceCall<T> implements IServiceCall<T> {
 			token = this.client.accessToken!
 		}
 
+		this._token = token
 		headers = headers ?? {}
 		headers["Authorization"] = "Bearer " + token
 		return headers

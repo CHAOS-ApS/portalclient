@@ -20,6 +20,7 @@ export interface IServiceCall<T> {
 	readonly response: Promise<T>
 	readonly error: IServiceError | null
 	readonly attempts: number
+	readonly token: string | null
 	readonly wasAborted: boolean
 	abort(reason?: Error): void
 }
@@ -34,4 +35,4 @@ export interface IServiceError {
 	readonly Message: string
 }
 
-export type ErrorHandler = (error: IServiceError) => Promise<boolean>
+export type ErrorHandler = (error: IServiceError, token: string | null) => Promise<boolean>
