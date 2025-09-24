@@ -149,7 +149,9 @@ export class ServiceCall<T> implements IServiceCall<T> {
 		if (response.ok) {
 			if (response.status === 204)
 				return Promise.resolve() as any as Promise<T>
-			return encoding === Encoding.Json ? response.json() : response.blob() as Promise<T>
+			return encoding === Encoding.Json
+				? response.json()
+				: response.blob() as Promise<T>
 		}
 
 		if (response.status >= 400 && response.status < 500)
